@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#a6192e">
+    <title>Room Finder | Summit SFU</title>
+    <style>
+        :root {
+            --red: #a6192e; --red-dark: #831225; --red-light: #f9edf0;
+            --ink: #202426; --muted: #636968; --line: #e0e3df;
+            --paper: #f6f7f3; --white: #fff; --radius: 18px;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; background: var(--paper); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.55; }
+        button, input { font: inherit; }
+        a { color: inherit; }
+        button, a, input { -webkit-tap-highlight-color: transparent; }
+        button { cursor: pointer; }
+        button:disabled { cursor: wait; opacity: .75; }
+        :focus-visible { outline: 3px solid var(--red); outline-offset: 4px; }
+        [hidden] { display: none !important; }
+        .wrap { width: min(1120px, calc(100% - 64px)); margin-inline: auto; }
+        .skip-link { position: absolute; left: 20px; top: -70px; z-index: 10; padding: 12px 18px; background: var(--white); }
+        .skip-link:focus { top: 10px; }
+        .topbar { background: var(--white); border-bottom: 1px solid var(--line); }
+        .header-inner { min-height: 86px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+        .brand { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; }
+        .brand-mark { display: grid; place-items: center; width: 42px; height: 42px; background: var(--red); color: white; border-radius: 12px; }
+        .brand-name { font-size: 21px; font-weight: 800; letter-spacing: -.7px; }
+        .brand-name span { color: var(--red); }
+        .nav-link { display: inline-flex; align-items: center; gap: 9px; padding: 28px 0 25px; border-bottom: 3px solid var(--red); font-size: 14px; font-weight: 650; text-decoration: none; }
+        .icon { width: 20px; height: 20px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+        main { padding-block: 48px 60px; }
+        .hero { display: flex; align-items: center; justify-content: space-between; gap: 48px; margin-bottom: 32px; }
+        .eyebrow { display: flex; align-items: center; gap: 10px; margin: 0 0 15px; color: var(--red); font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; }
+        .eyebrow::before { content: ""; width: 23px; height: 2px; background: currentColor; }
+        h1 { margin: 0 0 14px; font-size: clamp(36px, 4.6vw, 56px); line-height: 1.08; letter-spacing: -2px; font-weight: 760; }
+        h1 span { color: var(--red); }
+        .intro { max-width: 540px; margin: 0; color: var(--muted); font-size: 16px; }
+        .hero-art { width: 210px; height: 144px; flex-shrink: 0; color: var(--red); }
+        .search-card { padding: 26px 30px 25px; background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: 0 5px 18px #18261c05; }
+        .search-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+        .section-label { margin: 0; font-size: 17px; font-weight: 750; letter-spacing: -.3px; }
+        .text-link { display: inline-flex; align-items: center; gap: 7px; color: var(--red); font-size: 13px; font-weight: 700; text-underline-offset: 4px; }
+        .text-link:hover { color: var(--red-dark); }
+        .search-tabs { display: flex; flex-wrap: wrap; gap: 7px; margin: 20px 0; }
+        .tab { display: inline-flex; align-items: center; gap: 8px; min-height: 42px; padding: 9px 16px; border: 1px solid transparent; border-radius: 9px; background: var(--paper); color: var(--muted); font-size: 13px; font-weight: 650; }
+        .tab:hover { border-color: #c8ccc5; color: var(--ink); }
+        .tab[aria-selected="true"] { border-color: #ebcad1; background: var(--red-light); color: var(--red); }
+        .search-panel { margin-top: 20px; }
+        .search-panel + .search-panel { margin-top: 24px; }
+        .search-panel[role="tabpanel"] { margin-top: 0; }
+        .field-label { display: block; margin-bottom: 7px; font-size: 13px; font-weight: 700; }
+        .search-row { display: flex; gap: 12px; }
+        .input-wrap { position: relative; flex: 1; min-width: 0; }
+        .input-wrap > .icon { position: absolute; left: 16px; top: 18px; color: var(--muted); pointer-events: none; }
+        input { width: 100%; height: 56px; padding: 12px 16px 12px 46px; border: 1px solid #ccd1cc; border-radius: 10px; background: white; color: var(--ink); font-size: 16px; }
+        input::placeholder { color: #767b78; }
+        input:hover { border-color: #929a93; }
+        .primary-button { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 56px; padding: 12px 24px; border: 1px solid var(--red); border-radius: 10px; background: var(--red); color: white; font-size: 14px; font-weight: 700; text-decoration: none; white-space: nowrap; }
+        .primary-button:hover { background: var(--red-dark); border-color: var(--red-dark); }
+        .field-help { margin: 9px 0 0; color: var(--muted); font-size: 12px; }
+        .field-help strong { color: #424944; font-weight: 650; }
+        .search-footer { display: flex; align-items: center; gap: 7px; margin-top: 20px; padding-top: 17px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+        .search-footer .icon { width: 15px; height: 15px; }
+        .results-section { margin-top: 34px; }
+        .results-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 17px; }
+        .results-heading h2 { margin: 0; font-size: 20px; letter-spacing: -.5px; }
+        .results-caption { margin: 4px 0 0; color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+        .count { display: inline-flex; padding: 5px 12px; border: 1px solid var(--line); border-radius: 30px; background: var(--white); color: #505853; font-size: 12px; white-space: nowrap; }
+        .room-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+        .single-result { max-width: 600px; grid-template-columns: minmax(0, 1fr); }
+        .room-card { position: relative; padding: 23px; border: 1px solid var(--line); border-radius: 15px; background: var(--white); overflow-wrap: anywhere; }
+        .room-card-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
+        .room-symbol { display: grid; place-items: center; width: 38px; height: 38px; color: var(--red); background: var(--red-light); border-radius: 10px; flex-shrink: 0; }
+        .campus-badge { padding: 4px 10px; background: #f0f3ee; border-radius: 30px; color: #4c5c50; font-size: 11px; font-weight: 650; }
+        .room-card h3 { margin: 0 0 3px; font-size: 25px; letter-spacing: -.7px; line-height: 1.2; }
+        .building-name { margin: 0; color: var(--muted); font-size: 13px; }
+        .room-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 18px; margin: 21px 0 0; padding-top: 18px; border-top: 1px solid var(--line); }
+        .room-facts dt { margin-bottom: 3px; color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .8px; }
+        .room-facts dd { margin: 0; font-size: 13px; font-weight: 650; }
+        .room-facts .wide { grid-column: 1 / -1; }
+        .room-category { text-transform: capitalize; }
+        .empty-state { display: flex; align-items: center; gap: 26px; padding: 32px; border: 1px dashed #ced5cd; border-radius: var(--radius); background: #ffffff80; }
+        .empty-icon { display: grid; place-items: center; width: 66px; height: 66px; flex-shrink: 0; border: 1px solid var(--line); border-radius: 18px; background: var(--white); color: #6c7b6e; }
+        .empty-icon .icon { width: 28px; height: 28px; }
+        .empty-state h2 { margin: 0 0 5px; font-size: 18px; letter-spacing: -.35px; }
+        .empty-state p { max-width: 620px; margin: 0; color: var(--muted); font-size: 13px; }
+        .error-state { border-style: solid; border-color: #e9c7ce; background: #fffafa; }
+        .error-state .empty-icon { color: var(--red); border-color: #efd9de; background: var(--red-light); }
+        .error-state .text-link { margin-top: 12px; }
+        .page-footer { display: flex; justify-content: space-between; gap: 20px; margin-top: 34px; padding-top: 21px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+        .footer-brand { color: #4d5650; font-weight: 700; }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+        @media (max-width: 950px) { .room-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .single-result { grid-template-columns: minmax(0, 1fr); } }
+        @media (max-width: 650px) {
+            .wrap { width: calc(100% - 36px); }
+            .header-inner { min-height: 72px; }
+            .brand-name { font-size: 19px; }
+            .brand-mark { width: 36px; height: 36px; border-radius: 10px; }
+            .nav-link { font-size: 12px; padding-block: 22px 19px; }
+            .nav-link .icon { display: none; }
+            main { padding-top: 34px; }
+            .hero { margin-bottom: 25px; }
+            .hero-art { display: none; }
+            h1 { letter-spacing: -1.3px; }
+            .intro { font-size: 14px; }
+            .search-card { padding: 20px; }
+            .search-top { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .section-label { font-size: 15px; }
+            .search-top .text-link { font-size: 12px; }
+            .search-tabs { display: grid; grid-template-columns: 1.1fr .8fr 1.1fr; gap: 6px; }
+            .tab { justify-content: center; padding: 8px; font-size: 11px; }
+            .tab .icon { display: none; }
+            .search-row { flex-direction: column; gap: 10px; }
+            .primary-button { min-height: 50px; }
+            .room-grid { grid-template-columns: minmax(0, 1fr); }
+            .empty-state { align-items: flex-start; padding: 25px 22px; gap: 16px; }
+            .empty-icon { width: 45px; height: 45px; border-radius: 12px; }
+            .empty-icon .icon { width: 23px; height: 23px; }
+            .empty-state h2 { font-size: 16px; }
+            .page-footer { flex-direction: column; gap: 4px; }
+        }
+        @media (prefers-reduced-motion: no-preference) {
+            .tab, .primary-button, input { transition: background-color .15s, border-color .15s; }
+            .is-loading .button-icon { animation: pulse .8s ease-in-out infinite alternate; }
+            @keyframes pulse { to { opacity: .3; } }
+        }
+    </style>
+</head>
+<body th:attr="data-search-type=${searchType != null ? searchType : 'number'}">
+<a class="skip-link" href="#main">Skip to room search</a>
+
+<!-- Shared inline icons: no CDN or icon library needed. -->
+<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="display:none">
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+    <symbol id="i-building" viewBox="0 0 24 24"><path d="M4 21V5l8-3v19M12 8h8v13M2 21h20M7 8h2m-2 4h2m-2 4h2m7-4h1m-1 4h1"/></symbol>
+    <symbol id="i-door" viewBox="0 0 24 24"><path d="M5 21V3h14v18M3 21h18M9 3v18m6-9h1"/></symbol>
+</svg>
+
+<header class="topbar">
+    <div class="wrap header-inner">
+        <a class="brand" href="/room" th:href="@{/room}" aria-label="Summit SFU room finder">
+            <span class="brand-mark" aria-hidden="true"><svg width="28" height="23" viewBox="0 0 28 23" fill="none"><path d="m3 18 8-13 8 13H3Zm12-9 3-5 8 14h-5" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span>
+            <span class="brand-name">Summit <span>SFU</span></span>
+        </a>
+        <nav aria-label="Main navigation"><a class="nav-link" href="/room" th:href="@{/room}" aria-current="page"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>Room finder</a></nav>
+    </div>
+</header>
+
+<main class="wrap" id="main">
+    <section class="hero" aria-labelledby="page-title">
+        <div>
+            <p class="eyebrow">Your campus, a little clearer</p>
+            <h1 id="page-title">Find <span>your room.</span></h1>
+            <p class="intro">From a room number to the right building. Search the SFU campus directory and know where you're headed.</p>
+        </div>
+        <svg class="hero-art" viewBox="0 0 210 144" fill="none" aria-hidden="true">
+            <circle cx="113" cy="69" r="62" fill="#e9eee5"/>
+            <path d="M16 125h184M30 125V69l52-20v76M82 125V83l39-13v55M121 125V55l56 17v53" stroke="#9ca99c" stroke-width="1.5" stroke-linejoin="round"/>
+            <path d="M42 78v11m13-16v11m13-16v11m-26 20v11m13-16v11m13-16v11m28-10v15m12-19v15m29-37v12m15-7v12m15-8v12m-30 0v12m15-7v12m15-8v12" stroke="#9ca99c" stroke-width="1.5"/>
+            <path d="M118 30c0 12-17 27-17 27S84 42 84 30a17 17 0 1 1 34 0Z" fill="#a6192e"/>
+            <circle cx="101" cy="30" r="5" fill="white"/>
+        </svg>
+    </section>
+
+    <section class="search-card" aria-labelledby="search-title">
+        <div class="search-top">
+            <h2 class="section-label" id="search-title">Where are you going?</h2>
+            <a class="text-link" href="/room/getAllRooms" th:href="@{/room/getAllRooms}">Browse all rooms<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        </div>
+
+        <div class="search-tabs" id="search-tabs" hidden>
+            <button class="tab" id="tab-number" type="button" data-mode="number"><svg class="icon" aria-hidden="true"><use href="#i-door"/></svg>Room number</button>
+            <button class="tab" id="tab-campus" type="button" data-mode="campus"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>Campus</button>
+            <button class="tab" id="tab-building" type="button" data-mode="building"><svg class="icon" aria-hidden="true"><use href="#i-building"/></svg>Building code</button>
+        </div>
+
+        <div class="search-panel" id="panel-number" data-panel="number">
+            <form action="/room/findByNumber" th:action="@{/room/findByNumber}" method="get">
+                <label class="field-label" for="room-number">Room number</label>
+                <div class="search-row">
+                    <div class="input-wrap"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input id="room-number" type="text" name="roomNumber" placeholder="e.g. 3005" th:value="${param['roomNumber'] != null ? param['roomNumber'][0] : ''}" aria-describedby="number-help" maxlength="80" required></div>
+                    <button class="primary-button" type="submit"><span class="button-label">Find room</span><svg class="icon button-icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+                </div>
+                <p class="field-help" id="number-help">Have <strong>AQ 3005</strong>? Enter <strong>3005</strong> here. To browse AQ, use Building code.</p>
+            </form>
+        </div>
+
+        <div class="search-panel" id="panel-campus" data-panel="campus">
+            <form action="/room/getRoomByCampus" th:action="@{/room/getRoomByCampus}" method="get">
+                <label class="field-label" for="campus">Campus name</label>
+                <div class="search-row">
+                    <div class="input-wrap"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input id="campus" type="text" name="campus" list="campus-options" placeholder="e.g. Burnaby" th:value="${param['campus'] != null ? param['campus'][0] : ''}" aria-describedby="campus-help" maxlength="80" required><datalist id="campus-options"><option value="Burnaby"></option><option value="Surrey"></option><option value="Vancouver"></option></datalist></div>
+                    <button class="primary-button" type="submit"><span class="button-label">Find rooms</span><svg class="icon button-icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+                </div>
+                <p class="field-help" id="campus-help">Browse the rooms in the directory for a campus. Try <strong>Burnaby</strong>, <strong>Surrey</strong>, or <strong>Vancouver</strong>.</p>
+            </form>
+        </div>
+
+        <div class="search-panel" id="panel-building" data-panel="building">
+            <form action="/room/getByBuildCode" th:action="@{/room/getByBuildCode}" method="get">
+                <label class="field-label" for="building-code">Building code</label>
+                <div class="search-row">
+                    <div class="input-wrap"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input id="building-code" type="text" name="buildCode" placeholder="e.g. AQ" th:value="${param['buildCode'] != null ? param['buildCode'][0] : ''}" aria-describedby="building-help" autocapitalize="characters" spellcheck="false" maxlength="80" required></div>
+                    <button class="primary-button" type="submit"><span class="button-label">Find rooms</span><svg class="icon button-icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+                </div>
+                <p class="field-help" id="building-help">Use the building abbreviation. For example, <strong>AQ</strong> is Academic Quadrangle.</p>
+            </form>
+        </div>
+        <div class="search-footer"><svg class="icon" aria-hidden="true"><use href="#i-building"/></svg>Room details include the building, floor, campus, and category.</div>
+        <p class="sr-only" id="search-status" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="results-section" aria-label="Room search results">
+        <div class="empty-state" th:if="${room == null and rooms == null and error == null}">
+            <div class="empty-icon" aria-hidden="true"><svg class="icon"><use href="#i-pin"/></svg></div>
+            <div><h2>Your next stop starts here.</h2><p>Search for a room number, choose a campus, or explore a building. Your room details will appear here.</p></div>
+        </div>
+
+        <div class="empty-state error-state" role="alert" th:if="${error != null}">
+            <div class="empty-icon" aria-hidden="true"><svg class="icon"><use href="#i-search"/></svg></div>
+            <div><h2>Let's try another search.</h2><p th:text="${error}"></p><a class="text-link" href="/room/getAllRooms" th:href="@{/room/getAllRooms}">Browse the room directory<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
+        </div>
+
+        <div class="empty-state" th:if="${rooms != null and #lists.isEmpty(rooms) and room == null and error == null}">
+            <div class="empty-icon" aria-hidden="true"><svg class="icon"><use href="#i-search"/></svg></div>
+            <div><h2>No rooms found.</h2><p>Try a different room number, campus, or building code.</p></div>
+        </div>
+
+        <div th:if="${room != null}">
+            <div class="results-heading"><div><h2>Room details</h2><p class="results-caption">Here's where you're headed.</p></div><span class="count">1 room</span></div>
+            <div class="room-grid single-result">
+                <article class="room-card">
+                    <div class="room-card-top"><span class="room-symbol" aria-hidden="true"><svg class="icon"><use href="#i-door"/></svg></span><span class="campus-badge" th:text="${#strings.isEmpty(room.campus) ? 'Campus not listed' : room.campus}"></span></div>
+                    <h3 th:text="${#strings.isEmpty(room.roomCode) ? 'Room details' : room.roomCode}"></h3>
+                    <p class="building-name" th:text="${#strings.isEmpty(room.buildingName) ? 'Building not listed' : room.buildingName}"></p>
+                    <dl class="room-facts">
+                        <div><dt>Building code</dt><dd th:text="${#strings.isEmpty(room.buildCode) ? 'Not listed' : room.buildCode}"></dd></div>
+                        <div><dt>Room number</dt><dd th:text="${#strings.isEmpty(room.roomNumber) ? 'Not listed' : room.roomNumber}"></dd></div>
+                        <div><dt>Floor</dt><dd th:text="${#strings.isEmpty(room.floor) ? 'Not listed' : room.floor}"></dd></div>
+                        <div><dt>Campus</dt><dd th:text="${#strings.isEmpty(room.campus) ? 'Not listed' : room.campus}"></dd></div>
+                        <div class="wide"><dt>Category</dt><dd class="room-category" th:text="${#strings.isEmpty(room.roomCategory) ? 'Not listed' : #strings.toLowerCase(room.roomCategory)}"></dd></div>
+                    </dl>
+                </article>
+            </div>
+        </div>
+
+        <!-- Multiple rooms: keeps your existing 'rooms' model attribute. -->
+        <div th:if="${rooms != null and !#lists.isEmpty(rooms)}">
+            <div class="results-heading"><div><h2 th:text="${resultsTitle != null ? resultsTitle : 'Rooms'}">Rooms</h2><p class="results-caption" th:if="${query != null and query != ''}" th:text="|Results for &quot;${query}&quot;|"></p></div><span class="count" th:text="${#lists.size(rooms) == 1 ? '1 room' : #lists.size(rooms) + ' rooms'}"></span></div>
+            <div class="room-grid">
+                <article class="room-card" th:each="roomItem : ${rooms}">
+                    <div class="room-card-top"><span class="room-symbol" aria-hidden="true"><svg class="icon"><use href="#i-door"/></svg></span><span class="campus-badge" th:text="${#strings.isEmpty(roomItem.campus) ? 'Campus not listed' : roomItem.campus}"></span></div>
+                    <h3 th:text="${#strings.isEmpty(roomItem.roomCode) ? 'Room details' : roomItem.roomCode}"></h3>
+                    <p class="building-name" th:text="${#strings.isEmpty(roomItem.buildingName) ? 'Building not listed' : roomItem.buildingName}"></p>
+                    <dl class="room-facts">
+                        <div><dt>Building code</dt><dd th:text="${#strings.isEmpty(roomItem.buildCode) ? 'Not listed' : roomItem.buildCode}"></dd></div>
+                        <div><dt>Room number</dt><dd th:text="${#strings.isEmpty(roomItem.roomNumber) ? 'Not listed' : roomItem.roomNumber}"></dd></div>
+                        <div><dt>Floor</dt><dd th:text="${#strings.isEmpty(roomItem.floor) ? 'Not listed' : roomItem.floor}"></dd></div>
+                        <div><dt>Campus</dt><dd th:text="${#strings.isEmpty(roomItem.campus) ? 'Not listed' : roomItem.campus}"></dd></div>
+                        <div class="wide"><dt>Category</dt><dd class="room-category" th:text="${#strings.isEmpty(roomItem.roomCategory) ? 'Not listed' : #strings.toLowerCase(roomItem.roomCategory)}"></dd></div>
+                    </dl>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <footer class="page-footer"><span class="footer-brand">Summit SFU <span aria-hidden="true">/</span> Campus directory</span><span>A student-built project for finding your way around SFU.</span></footer>
+</main>
+
+<script>
+    (() => {
+        const tabList = document.getElementById('search-tabs');
+        const tabs = [...tabList.querySelectorAll('[data-mode]')];
+        const panels = [...document.querySelectorAll('[data-panel]')];
+        const modes = tabs.map(tab => tab.dataset.mode);
+
+        function selectMode(mode, moveFocus = false) {
+            tabs.forEach(tab => {
+                const active = tab.dataset.mode === mode;
+                tab.setAttribute('aria-selected', String(active));
+                tab.tabIndex = active ? 0 : -1;
+                if (active && moveFocus) tab.focus();
+            });
+            panels.forEach(panel => { panel.hidden = panel.dataset.panel !== mode; });
+        }
+
+        tabList.hidden = false;
+        tabList.setAttribute('role', 'tablist');
+        tabList.setAttribute('aria-label', 'Search rooms by');
+        tabs.forEach((tab, index) => {
+            tab.setAttribute('role', 'tab');
+            tab.setAttribute('aria-controls', 'panel-' + tab.dataset.mode);
+            tab.addEventListener('click', () => selectMode(tab.dataset.mode));
+            tab.addEventListener('keydown', event => {
+                let next;
+                if (event.key === 'ArrowRight') next = (index + 1) % tabs.length;
+                if (event.key === 'ArrowLeft') next = (index - 1 + tabs.length) % tabs.length;
+                if (event.key === 'Home') next = 0;
+                if (event.key === 'End') next = tabs.length - 1;
+                if (next !== undefined) { event.preventDefault(); selectMode(modes[next], true); }
+            });
+        });
+        panels.forEach(panel => {
+            panel.setAttribute('role', 'tabpanel');
+            panel.setAttribute('aria-labelledby', 'tab-' + panel.dataset.panel);
+        });
+
+        const params = new URLSearchParams(window.location.search);
+        const activeMode = params.has('campus') ? 'campus' : params.has('buildCode') ? 'building' : params.has('roomNumber') ? 'number' : document.body.dataset.searchType;
+        selectMode(modes.includes(activeMode) ? activeMode : 'number');
+
+        const status = document.getElementById('search-status');
+        document.querySelectorAll('.search-panel form').forEach(form => {
+            const input = form.querySelector('input');
+            const button = form.querySelector('button[type="submit"]');
+            const label = button.querySelector('.button-label');
+            const originalLabel = label.textContent;
+            input.addEventListener('input', () => input.setCustomValidity(''));
+            form.addEventListener('submit', event => {
+                input.value = input.value.trim();
+                if (!input.value) {
+                    event.preventDefault();
+                    input.setCustomValidity('Enter a search value.');
+                    input.reportValidity();
+                    return;
+                }
+                button.disabled = true;
+                button.classList.add('is-loading');
+                label.textContent = 'Searching…';
+                form.setAttribute('aria-busy', 'true');
+                status.textContent = 'Searching the room directory.';
+            });
+            window.addEventListener('pageshow', () => {
+                button.disabled = false;
+                button.classList.remove('is-loading');
+                label.textContent = originalLabel;
+                form.removeAttribute('aria-busy');
+                status.textContent = '';
+            });
+        });
+    })();
+</script>
+</body>
+</html>
