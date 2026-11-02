@@ -3,7 +3,7 @@ package com.example.demo.dto;
 public class SfuRoomFeature {
     private SfuRoomAttributes attributes; 
 
-    public SfuRoomAttributes gAttributes(){
+    public SfuRoomAttributes getAttributes(){
         return attributes; 
     }
 

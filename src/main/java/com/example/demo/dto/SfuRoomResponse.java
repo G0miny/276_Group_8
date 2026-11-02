@@ -5,7 +5,7 @@ import java.util.List;
 public class SfuRoomResponse {
     private List<SfuRoomFeature> features; 
 
-    public List<SfuRoomFeature> getFeatures ( List <SfuRoomFeature> features){
+    public List<SfuRoomFeature> getFeatures (){
         return features; 
     }
 
