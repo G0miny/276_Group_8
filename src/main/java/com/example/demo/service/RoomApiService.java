@@ -24,19 +24,28 @@ public class RoomApiService {
     }
 
     public void loadApi(){
+        if (roomRepository.count() > 0) {
+            return;
+        }
+        
         SfuRoomResponse response = restClient.get()
         .uri(uriBuilder -> uriBuilder
                 .scheme("https")
                 .host("viewsfu-prd.its.sfu.ca")
                 .path("/fsgis/rest/services/RoomFinder/RoomFinder2024_RoomSearch/MapServer/0/query")
-                .queryParam("where", "bl_abbr='AQ' AND rm_id='3005'")
+                .queryParam("where", "searchable='Y'")
                 .queryParam("outFields", "*")
                 .queryParam("returnGeometry", false)
                 .queryParam("f", "json")
                 .build())
         .retrieve()
-        .body(SfuRoomResponse.class);    
+        .body(SfuRoomResponse.class);  
 
+        if(response == null || response.getFeatures() == null){
+            return; 
+        }
+
+        List<Room> rooms = new ArrayList<>();
         for(SfuRoomFeature feature : response.getFeatures()){
             SfuRoomAttributes roomData = feature.getAttributes();
             if (!roomRepository.existsByRoomCode(roomData.getJoin_id())) {
@@ -49,35 +58,27 @@ public class RoomApiService {
                         roomData.getCampus(),
                         roomData.getRm_cat()
                 );
-                roomRepository.save(room);
+
+                rooms.add(room); 
             }  
         }
+
+        roomRepository.saveAll(rooms);
     }
 
     public List<Room> findAll(){
-        List<Room> rooms = roomRepository.findAll(); 
-        return hasRoom(rooms); 
+        return roomRepository.findAll(); 
     }
 
     public Optional<Room> findByRoomNumber(String roomNumber){
-        Optional<Room> room = roomRepository.findByRoomNumber(roomNumber); 
-        return Optional.of(room).orElse(null); 
+        return roomRepository.findByRoomNumber(roomNumber); 
     }
-
     public List<Room> findByCampus(String campus){
-        List<Room> rooms = roomRepository.findByCampus(campus); 
-        return hasRoom(rooms); 
+        return roomRepository.findByCampus(campus); 
     }
 
     public List<Room> findByBuildCode(String buildCode){
-        List<Room> rooms = roomRepository.findByBuildCode(buildCode); 
-        return hasRoom(rooms); 
-    }
-
-    private List<Room> hasRoom(List<Room> rooms){
-        if(!rooms.isEmpty() && rooms != null){
-            return rooms; 
-        }
-        return new ArrayList<>();
+        return roomRepository.findByBuildCode(buildCode); 
+         
     }
 }
