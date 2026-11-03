@@ -9,7 +9,9 @@ import com.example.demo.dto.SfuRoomResponse;
 import com.example.demo.models.Room;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service 
 public class RoomApiService {
@@ -21,44 +23,55 @@ public class RoomApiService {
         this.roomRepository = roomRepository;
     }
 
-    public void loadApi(){
+    public void loadApi() {
+
         if (roomRepository.count() > 0) {
             return;
         }
-        
-        SfuRoomResponse response = restClient.get()
-        .uri(uriBuilder -> uriBuilder
-                .scheme("https")
-                .host("viewsfu-prd.its.sfu.ca")
-                .path("/fsgis/rest/services/RoomFinder/RoomFinder2024_RoomSearch/MapServer/0/query")
-                .queryParam("where", "searchable='Y'")
-                .queryParam("outFields", "*")
-                .queryParam("returnGeometry", false)
-                .queryParam("f", "json")
-                .build())
-        .retrieve()
-        .body(SfuRoomResponse.class);  
 
-        if(response == null || response.getFeatures() == null){
-            return; 
+        SfuRoomResponse response = restClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .scheme("https")
+                        .host("viewsfu-prd.its.sfu.ca")
+                        .path("/fsgis/rest/services/RoomFinder/RoomFinder2024_RoomSearch/MapServer/0/query")
+                        .queryParam("where", "searchable='Y'")
+                        .queryParam("outFields", "*")
+                        .queryParam("returnGeometry", false)
+                        .queryParam("f", "json")
+                        .build())
+                .retrieve()
+                .body(SfuRoomResponse.class);
+
+        if (response == null || response.getFeatures() == null) {
+            return;
         }
 
         List<Room> rooms = new ArrayList<>();
+        Set<String> roomCodes = new HashSet<>();
+
         for (SfuRoomFeature feature : response.getFeatures()) {
+
             SfuRoomAttributes roomData = feature.getAttributes();
-            Room room = new Room(
-                    roomData.getJoin_id(),
-                    roomData.getBl_abbr(),
-                    roomData.getBl_name(),
-                    roomData.getRm_id(),
-                    roomData.getFl_name(),
-                    roomData.getCampus(),
-                    roomData.getRm_cat()
-            );
-            rooms.add(room);
+
+            String roomCode = roomData.getJoin_id();
+
+            if (roomCode != null && roomCodes.add(roomCode)) {
+
+                Room room = new Room(
+                        roomData.getJoin_id(),
+                        roomData.getBl_abbr(),
+                        roomData.getBl_name(),
+                        roomData.getRm_id(),
+                        roomData.getFl_name(),
+                        roomData.getCampus(),
+                        roomData.getRm_cat()
+                );
+
+                rooms.add(room);
+            }
         }
-        
-        roomRepository.saveAll(rooms);   roomRepository.saveAll(rooms);
+
+        roomRepository.saveAll(rooms);
     }
 
     public List<Room> findAll(){
