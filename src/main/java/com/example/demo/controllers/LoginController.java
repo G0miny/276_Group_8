@@ -23,14 +23,14 @@ public class LoginController {
         this.userRepository = userRepository; 
     }
 
-    @GetMapping("/")
-    public String root(HttpSession session) {
-        User user = (User) session.getAttribute("loggedInUser");
-        if (user != null) {
-            return (user.getRole() == RoleType.ADMIN) ? "redirect:/admin/dashboard" : "redirect:/dashboard";
-        }
-        return "redirect:/login";
-    }
+    // @GetMapping("/login")
+    // public String root(HttpSession session) {
+    //     User user = (User) session.getAttribute("loggedInUser");
+    //     if (user != null) {
+    //         return (user.getRole() == RoleType.ADMIN) ? "redirect:/admin/dashboard" : "redirect:/dashboard";
+    //     }
+    //     return "redirect:/login";
+    // }
 
     @GetMapping("/login")
     public String showLoginPage() {

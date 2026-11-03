@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SFU Summit</title>
+
+    <style>
+        :root {
+            --red: #a6192e;
+            --red-dark: #831225;
+            --red-light: #f8ecef;
+            --text: #242827;
+            --muted: #646b67;
+            --border: #e0e4de;
+            --background: #f6f7f3;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            min-height: 100svh;
+            display: flex;
+            flex-direction: column;
+            font-family: -apple-system, BlinkMacSystemFont,
+                         "Segoe UI", Arial, sans-serif;
+            background: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        a:focus-visible {
+            outline: 3px solid var(--red);
+            outline-offset: 5px;
+        }
+
+        .skip-link {
+            position: absolute;
+            top: -60px;
+            left: 20px;
+            padding: 10px 16px;
+            background: white;
+            color: var(--red);
+            z-index: 10;
+        }
+
+        .skip-link:focus {
+            top: 10px;
+        }
+
+        /* NAVIGATION */
+
+        header {
+            background: white;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-container {
+            max-width: 1120px;
+            min-height: 84px;
+            margin: 0 auto;
+            padding: 18px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        .logo {
+            color: var(--red);
+            font-size: 21px;
+            font-weight: 800;
+            letter-spacing: -.6px;
+            white-space: nowrap;
+        }
+
+        .logo span {
+            color: var(--text);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .nav-links a {
+            padding: 8px 12px;
+            color: #505853;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 7px;
+        }
+
+        .nav-links a:hover,
+        .nav-links a[aria-current="page"] {
+            color: var(--red);
+        }
+
+        .nav-links .register-link {
+            margin-left: 6px;
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .nav-links .register-link:hover {
+            background: var(--red-light);
+            border-color: #e6c4cc;
+        }
+
+        /* HERO */
+
+        main {
+            flex: 1;
+            display: grid;
+            place-items: center;
+            padding: 72px 24px;
+        }
+
+        .hero {
+            width: 100%;
+            max-width: 820px;
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-block;
+            margin: 0 0 24px;
+            padding: 7px 15px;
+            border: 1px solid #edd4da;
+            border-radius: 30px;
+            background: var(--red-light);
+            color: var(--red);
+            font-size: 12px;
+            font-weight: 650;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(40px, 6vw, 68px);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -2.5px;
+        }
+
+        h1 span {
+            display: block;
+            color: var(--red);
+        }
+
+        .hero-description {
+            max-width: 500px;
+            margin: 24px auto 30px;
+            color: var(--muted);
+            font-size: 17px;
+            line-height: 1.7;
+        }
+
+        /* BUTTONS */
+
+        .buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            min-height: 50px;
+            padding: 12px 25px;
+            border: 1px solid transparent;
+            border-radius: 9px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .primary-button {
+            background: var(--red);
+            color: white;
+        }
+
+        .primary-button:hover {
+            background: var(--red-dark);
+        }
+
+        .secondary-button {
+            background: white;
+            border-color: #d5dad3;
+            color: var(--text);
+        }
+
+        .secondary-button:hover {
+            border-color: var(--red);
+            color: var(--red);
+        }
+
+        /* SEARCH INFORMATION */
+
+        .search-options {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            margin-top: 56px;
+            text-align: left;
+        }
+
+        .search-option {
+            padding: 21px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+
+        .search-option h2 {
+            margin: 0 0 6px;
+            color: var(--text);
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .search-option p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+
+        /* FOOTER */
+
+        footer {
+            padding: 20px 24px;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            text-align: center;
+            font-size: 12px;
+        }
+
+        /* MOBILE */
+
+        @media (max-width: 650px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 12px;
+                padding: 20px 16px;
+            }
+
+            .nav-links {
+                justify-content: center;
+                gap: 4px;
+            }
+
+            .nav-links a {
+                padding: 8px 10px;
+                font-size: 13px;
+            }
+
+            .nav-links .register-link {
+                margin-left: 0;
+                padding: 8px 12px;
+            }
+
+            main {
+                padding: 48px 22px;
+            }
+
+            h1 {
+                letter-spacing: -1.5px;
+            }
+
+            .hero-description {
+                font-size: 16px;
+            }
+
+            .search-options {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                margin-top: 36px;
+            }
+
+            .search-option {
+                padding: 17px 20px;
+            }
+        }
+
+        @media (prefers-reduced-motion: no-preference) {
+            .button,
+            .nav-links a {
+                transition:
+                    background-color .15s,
+                    color .15s,
+                    border-color .15s;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header>
+        <div class="nav-container">
+
+            <a class="logo" href="/" th:href="@{/}">
+                SFU <span>Room Finder</span>
+            </a>
+
+            <nav class="nav-links" aria-label="Main navigation">
+
+                <a href="/"
+                   th:href="@{/}"
+                   aria-current="page">
+                    Home
+                </a>
+
+                <a href="/room" th:href="@{/room}">
+                    Find Rooms
+                </a>
+
+                <a href="/login" th:href="@{/login}">
+                    Login
+                </a>
+
+                <a class="register-link"
+                   href="/register"
+                   th:href="@{/register}">
+                    Register
+                </a>
+
+            </nav>
+        </div>
+    </header>
+
+    <main id="main">
+        <section class="hero" aria-labelledby="hero-title">
+
+            <p class="eyebrow">
+                Made for the SFU community
+            </p>
+
+            <h1 id="hero-title">
+                Find your next
+                <span>SFU room.</span>
+            </h1>
+
+            <p class="hero-description">
+                Spend less time searching and more time getting there.
+                Find rooms by room number, campus, or building code.
+            </p>
+
+            <div class="buttons">
+
+                <a class="button primary-button"
+                   href="/room"
+                   th:href="@{/room}">
+                    Find a Room
+                    <span aria-hidden="true">&rarr;</span>
+                </a>
+
+                <a class="button secondary-button"
+                   href="/login"
+                   th:href="@{/login}">
+                    Login
+                </a>
+
+            </div>
+
+            <div class="search-options">
+
+                <div class="search-option">
+                    <h2>Room number</h2>
+                    <p>
+                        Know your room number?
+                        Start with a search, like 3005.
+                    </p>
+                </div>
+
+                <div class="search-option">
+                    <h2>Campus</h2>
+                    <p>
+                        Browse the rooms in the directory
+                        for your SFU campus.
+                    </p>
+                </div>
+
+                <div class="search-option">
+                    <h2>Building code</h2>
+                    <p>
+                        Explore a building, like AQ
+                        for Academic Quadrangle.
+                    </p>
+                </div>
+
+            </div>
+
+        </section>
+    </main>
+
+    <footer>
+        CMPT 276 &middot; Group 8
+    </footer>
+
+</body>
+</html>
