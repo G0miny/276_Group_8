@@ -6,7 +6,6 @@ import com.example.demo.models.Room;
 import com.example.demo.service.RoomApiService;
 
 import java.util.List;
-import java.util.Optional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,9 +31,10 @@ public class RoomController {
     @GetMapping("/room/findByNumber")
     public String getRoomByNumber(@RequestParam String roomNumber, Model model) {
         roomApiService.loadApi();
-        Optional<Room> room = roomApiService.findByRoomNumber(roomNumber);
-        if (room.isPresent()) {
-            model.addAttribute("room", room.get());
+        List<Room> rooms = roomApiService.findByRoomNumber(roomNumber);
+
+        if (rooms != null && !rooms.isEmpty()) {
+            model.addAttribute("rooms", rooms);
         } else {
             model.addAttribute(
                     "error",

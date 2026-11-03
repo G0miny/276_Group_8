@@ -48,15 +48,15 @@ public class RoomControllerTest {
                 "Burnaby",
                 "CLASSROOM"
         );
-
+    
         when(roomApiService.findByRoomNumber("3005"))
-                .thenReturn(Optional.of(room));
-
+                .thenReturn(List.of(room));
+    
         mockMvc.perform(get("/room/findByNumber")
                         .param("roomNumber", "3005"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("room/findRoom"))
-                .andExpect(model().attribute("room", room));
+                .andExpect(model().attribute("rooms", List.of(room)));
     }
 
 
