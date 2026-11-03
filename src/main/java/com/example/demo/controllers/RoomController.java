@@ -20,7 +20,7 @@ public class RoomController {
 
     @GetMapping("/room")
     public String getRoomPage() {
-        if (roomApiService.findAll().isEmpty()) {
+        if (roomApiService.hasRoom()) {
             roomApiService.loadApi();
         }
     
@@ -95,5 +95,4 @@ public class RoomController {
     private boolean hasRoom(List<Room> room){
         return room != null && !room.isEmpty();
     }
-    
 }

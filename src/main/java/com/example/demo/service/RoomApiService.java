@@ -24,8 +24,7 @@ public class RoomApiService {
     }
 
     public void loadApi() {
-
-        if (roomRepository.count() > 0) {
+        if (hasRoom()) {
             return;
         }
 
@@ -50,13 +49,10 @@ public class RoomApiService {
         Set<String> roomCodes = new HashSet<>();
 
         for (SfuRoomFeature feature : response.getFeatures()) {
-
             SfuRoomAttributes roomData = feature.getAttributes();
-
             String roomCode = roomData.getJoin_id();
 
             if (roomCode != null && roomCodes.add(roomCode)) {
-
                 Room room = new Room(
                         roomData.getJoin_id(),
                         roomData.getBl_abbr(),
@@ -66,11 +62,9 @@ public class RoomApiService {
                         roomData.getCampus(),
                         roomData.getRm_cat()
                 );
-
                 rooms.add(room);
             }
         }
-
         roomRepository.saveAll(rooms);
     }
 
@@ -88,6 +82,9 @@ public class RoomApiService {
 
     public List<Room> findByBuildCode(String buildCode){
         return roomRepository.findByBuildCode(buildCode); 
-         
+    }
+
+    public boolean hasRoom(){
+        return roomRepository.count() > 0; 
     }
 }
