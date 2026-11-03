@@ -15,7 +15,7 @@ public class DemoApplication {
     public static void main(String[] args) {
         SpringApplication.run(DemoApplication.class, args);
     }
-
+    
     // Automatically runs when the server starts up
     @Bean
     CommandLineRunner initDefaultAccounts(UserRepository userRepository) {

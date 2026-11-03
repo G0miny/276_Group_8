@@ -30,7 +30,6 @@ public class RoomController {
 
     @GetMapping("/room/findByNumber")
     public String getRoomByNumber(@RequestParam String roomNumber, Model model) {
-        roomApiService.loadApi();
         List<Room> rooms = roomApiService.findByRoomNumber(roomNumber);
 
         if (rooms != null && !rooms.isEmpty()) {
@@ -42,7 +41,6 @@ public class RoomController {
             );
         }
         
-        roomApiService.loadApi();
         return "room/findRoom";
     }
 
