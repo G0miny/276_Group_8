@@ -1,8 +1,9 @@
 package com.example.demo.controllers;
 
+import com.example.demo.Repository.UserRepository;
 import com.example.demo.enums.RoleType;
 import com.example.demo.models.User;
-import com.example.demo.models.UserRepository;
+
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -18,14 +19,18 @@ public class LoginController {
     @Autowired
     private UserRepository userRepository;
 
-    @GetMapping("/")
-    public String root(HttpSession session) {
-        User user = (User) session.getAttribute("loggedInUser");
-        if (user != null) {
-            return (user.getRole() == RoleType.ADMIN) ? "redirect:/admin/dashboard" : "redirect:/dashboard";
-        }
-        return "redirect:/login";
+    public LoginController(UserRepository userRepository){
+        this.userRepository = userRepository; 
     }
+
+    // @GetMapping("/login")
+    // public String root(HttpSession session) {
+    //     User user = (User) session.getAttribute("loggedInUser");
+    //     if (user != null) {
+    //         return (user.getRole() == RoleType.ADMIN) ? "redirect:/admin/dashboard" : "redirect:/dashboard";
+    //     }
+    //     return "redirect:/login";
+    // }
 
     @GetMapping("/login")
     public String showLoginPage() {
