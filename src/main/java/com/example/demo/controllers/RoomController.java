@@ -9,6 +9,7 @@ import java.util.List;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller 
 public class RoomController {
@@ -26,7 +27,28 @@ public class RoomController {
     
         return "room/findRoom";
     }
+
+    // Map view
+    @GetMapping("/map")
+    public String getMapPage() {
+        if(!roomApiService.hasRoom()) {
+            roomApiService.loadApi();
+        }
+        return "map";
+    }
     
+    // JSON REST endpoint for Leaflet JS Map Pins
+    @GetMapping("/api/rooms/data")
+    @ResponseBody
+    public List<Room> getRoomsJsonData(@RequestParam(required = false) String buildCode, @RequestParam(required = false) String campus) {
+        if(buildCode != null && !buildCode.isEmpty()) {
+            return roomApiService.findByBuildCode(buildCode);
+        }
+        else if(campus != null && !campus.isEmpty()) {
+            return roomApiService.findByCampus(campus);
+        }
+        return roomApiService.findAll();
+    } 
 
     @GetMapping("/room/findByNumber")
     public String getRoomByNumber(@RequestParam String roomNumber, Model model) {
