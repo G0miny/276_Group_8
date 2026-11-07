@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Summit SFU - Interactive Campus Map & Room Finder</title>
+    
+    <!-- Leaflet CSS & JS Assets -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <style>
+        :root {
+            --sfu-red: #A6192E;
+            --sfu-dark-red: #821022;
+            --bg-light: #F8F9FA;
+            --text-dark: #1E293B;
+            --border-color: #E2E8F0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: var(--bg-light); color: var(--text-dark); min-height: 100vh; display: flex; flex-direction: column; }
+        header { background-color: var(--sfu-red); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+        header h1 { font-size: 1.4rem; font-weight: 700; }
+        nav a { color: white; text-decoration: none; margin-left: 1.5rem; font-weight: 500; font-size: 0.95rem; }
+        nav a:hover { text-decoration: underline; }
+        .main-container { display: flex; flex: 1; height: calc(100vh - 65px); }
+        .sidebar { width: 350px; background: white; border-right: 1px solid var(--border-color); padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; overflow-y: auto; z-index: 10; }
+        .search-card { background: #F1F5F9; padding: 1.25rem; border-radius: 10px; border: 1px solid #E2E8F0; }
+        .search-card h3 { font-size: 1rem; margin-bottom: 0.75rem; color: var(--sfu-dark-red); }
+        .form-group { margin-bottom: 0.75rem; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem; color: #475569; }
+        .form-control { width: 100%; padding: 0.6rem 0.8rem; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 0.9rem; outline: none; }
+        .form-control:focus { border-color: var(--sfu-red); }
+        .btn { width: 100%; padding: 0.65rem; background-color: var(--sfu-red); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
+        .btn:hover { background-color: var(--sfu-dark-red); }
+        .btn-outline { background-color: transparent; color: var(--sfu-red); border: 1px solid var(--sfu-red); margin-top: 0.5rem; }
+        .stats-badge { display: inline-block; background: #E2E8F0; color: #334155; padding: 0.3rem 0.6rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
+        #map { height: 550px; width: 100%; display: block; }
+        .popup-title { color: var(--sfu-red); font-weight: 700; font-size: 1rem; margin-bottom: 4px; border-bottom: 1px solid #E2E8F0; padding-bottom: 4px; }
+        .popup-detail { margin-top: 4px; color: #334155; font-size: 0.85rem; }
+        .popup-detail span { font-weight: 600; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Summit SFU — Campus Map & Room Finder</h1>
+        <nav>
+            <a th:href="@{/}" href="/">Home</a>
+            <a th:href="@{/room}" href="/room">Search Directory</a>
+            <a th:href="@{/dashboard}" href="/dashboard">Dashboard</a>
+        </nav>
+    </header>
+    <div class="main-container">
+        <aside class="sidebar">
+            <div class="search-card">
+                <h3>🔍 Filter Campus Map</h3>
+                <div class="form-group">
+                    <label for="buildCode">Building Code</label>
+                    <input type="text" id="buildCode" class="form-control" placeholder="e.g. AQ, CSIL, WMC, TASC1" />
+                </div>
+                <div class="form-group">
+                    <label for="roomNumber">Room Number</label>
+                    <input type="text" id="roomNumber" class="form-control" placeholder="e.g. 9201" />
+                </div>
+                <div class="form-group">
+                    <label for="campusSelect">Campus</label>
+                    <select id="campusSelect" class="form-control">
+                        <option value="">All Campuses</option>
+                        <option value="Burnaby">Burnaby</option>
+                        <option value="Surrey">Surrey</option>
+                        <option value="Vancouver">Vancouver</option>
+                    </select>
+                </div>
+                <button class="btn" onclick="filterMap()">Filter Pins</button>
+                <button class="btn btn-outline" onclick="resetMap()">Reset View</button>
+            </div>
+            <div class="search-card">
+                <h3>📌 Map Overview</h3>
+                <p style="font-size: 0.85rem; color: #64748B; margin-bottom: 0.5rem;">
+                    Interactive map showing room coordinates across SFU Burnaby Mountain campus.
+                </p>
+                <div>
+                    <span class="stats-badge" id="markerCount">0 Rooms Loaded</span>
+                </div>
+            </div>
+        </aside>
+        <div id="map"></div>
+    </div>
+    <script>
+        const sfuBurnabyLat = 49.2781;
+        const sfuBurnabyLng = -122.9199;
+        const map = L.map("map").setView([sfuBurnabyLat, sfuBurnabyLng], 16);
+        
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 19,
+            attribution: "© OpenStreetMap contributors | Summit SFU"
+        }).addTo(map);
+        
+        let markersLayer = L.layerGroup().addTo(map);
+
+        const sfuBuildingCoords = {
+            "AQ": [49.2788, -122.9189],
+            "TASC1": [49.2774, -122.9142],
+            "TASC2": [49.2770, -122.9148],
+            "WMC": [49.2796, -122.9225],
+            "CSIL": [49.2775, -122.9145],
+            "CS": [49.2775, -122.9145],
+            "SUB": [49.2785, -122.9168],
+            "RCB": [49.2791, -122.9174],
+            "SH": [49.2780, -122.9160],
+            "BLU": [49.2798, -122.9150]
+        };
+
+        function loadRooms(buildCode = "", campus = "", roomNum = "") {
+            let url = "/api/rooms/data?";
+            if (buildCode) url += "buildCode=" + encodeURIComponent(buildCode) + "&";
+            if (campus) url += "campus=" + encodeURIComponent(campus) + "&";
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(rooms => {
+                    if (roomNum) {
+                        rooms = rooms.filter(r => r.roomNumber && r.roomNumber.toLowerCase().includes(roomNum.toLowerCase()));
+                    }
+                    renderMarkers(rooms);
+                })
+                .catch(err => console.error("Error fetching room data:", err));
+        }
+
+        function renderMarkers(rooms) {
+            markersLayer.clearLayers();
+            let count = 0;
+            rooms.forEach(room => {
+                let lat = room.latitude;
+                let lng = room.longitude;
+                if (!lat || !lng) {
+                    const bCode = (room.buildCode || "").toUpperCase();
+                    if (sfuBuildingCoords[bCode]) {
+                        lat = sfuBuildingCoords[bCode][0];
+                        lng = sfuBuildingCoords[bCode][1];
+                    } else {
+                        lat = sfuBurnabyLat;
+                        lng = sfuBurnabyLng;
+                    }
+                }
+                const popupHtml = `
+                    <div class="popup-title">${room.buildingName || "SFU Building"} (${room.buildCode || "N/A"})</div>
+                    <div class="popup-detail"><span>Room Number:</span> ${room.roomNumber || "N/A"}</div>
+                    <div class="popup-detail"><span>Floor:</span> ${room.floor || "N/A"}</div>
+                    <div class="popup-detail"><span>Campus:</span> ${room.campus || "Burnaby"}</div>
+                    <div class="popup-detail"><span>Category:</span> ${room.roomCategory || "General Space"}</div>
+                `;
+                L.marker([lat, lng]).bindPopup(popupHtml).addTo(markersLayer);
+                count++;
+            });
+            document.getElementById("markerCount").innerText = count + " Rooms Loaded";
+        }
+
+        function filterMap() {
+            const buildCode = document.getElementById("buildCode").value.trim();
+            const roomNumber = document.getElementById("roomNumber").value.trim();
+            const campus = document.getElementById("campusSelect").value;
+            loadRooms(buildCode, campus, roomNumber);
+        }
+
+        function resetMap() {
+            document.getElementById("buildCode").value = "";
+            document.getElementById("roomNumber").value = "";
+            document.getElementById("campusSelect").value = "";
+            map.setView([sfuBurnabyLat, sfuBurnabyLng], 16);
+            loadRooms();
+        }
+
+        document.addEventListener("DOMContentLoaded", () => loadRooms());
+    </script>
+</body>
+</html>
