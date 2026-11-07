@@ -24,6 +24,9 @@ public class Room implements Serializable{
     private String campus; 
     private String roomCategory; 
 
+    private Double latitude;
+    private Double longitude;
+
     public Room(){}
 
     public Room(
@@ -42,6 +45,30 @@ public class Room implements Serializable{
         this.floor = floor;
         this.campus = campus;
         this.roomCategory = roomCategory;
+
+        assignDefaultCoordinates();
+    }
+
+    public void assignDefaultCoordinates() {
+        if(this.buildCode == null) return;
+        switch(this.buildCode.toUpperCase()) {
+            case "AQ":
+                this.latitude = 49.2788; this.longitude = -122.9189; break;
+            case "TASC1":
+            case "TASC2":
+                this.latitude = 49.2774; this.longitude = -122.9142; break;
+            case "WMC":
+                this.latitude = 49.2796; this.longitude = -122.9225; break;
+            case "CSIL":
+            case "CS":
+                this.latitude = 49.2775; this.longitude = -122.9145; break;
+            case "SUB":
+                this.latitude = 49.2785; this.longitude = -122.9168; break;
+            case "RCB":
+                this.latitude = 49.2791; this.longitude = -122.9174; break;
+            default:
+                this.latitude = 49.2781; this.longitude = -122.9199; break;
+        }
     }
 
     public Long getId() {
@@ -107,4 +134,10 @@ public class Room implements Serializable{
     public void setRoomCategory(String roomCategory) {
         this.roomCategory = roomCategory;
     }
+
+    public Double getLatitude() {return latitude;}
+    public void setLatitude(Double latitude) {this.latitude = latitude;}
+
+    public Double getLongitude() {return longitude;}
+    public void setLongitude(Double longitude) {this.longitude = longitude;}
 }
