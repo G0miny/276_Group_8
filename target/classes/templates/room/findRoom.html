@@ -249,7 +249,6 @@
             </div>
         </div>
 
-        <!-- Multiple rooms: keeps your existing 'rooms' model attribute. -->
         <div th:if="${rooms != null and !#lists.isEmpty(rooms)}">
             <div class="results-heading"><div><h2 th:text="${resultsTitle != null ? resultsTitle : 'Rooms'}">Rooms</h2><p class="results-caption" th:if="${query != null and query != ''}" th:text="|Results for &quot;${query}&quot;|"></p></div><span class="count" th:text="${#lists.size(rooms) == 1 ? '1 room' : #lists.size(rooms) + ' rooms'}"></span></div>
             <div class="room-grid">
@@ -313,7 +312,7 @@
         const params = new URLSearchParams(window.location.search);
         const activeMode = params.has('campus') ? 'campus' : params.has('buildCode') ? 'building' : params.has('roomNumber') ? 'number' : document.body.dataset.searchType;
         selectMode(modes.includes(activeMode) ? activeMode : 'number');
-
+        
         const status = document.getElementById('search-status');
         document.querySelectorAll('.search-panel form').forEach(form => {
             const input = form.querySelector('input');
