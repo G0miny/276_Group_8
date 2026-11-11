@@ -18,17 +18,15 @@ public class RoomController {
         this.roomApiService = roomApiService; 
     }
 
-    @GetMapping("/room")
+    @GetMapping
     public String getRoomPage() {
-        if (roomApiService.hasRoom()) {
+        if (roomApiService.size() == 0) {
             roomApiService.loadApi();
         }
-    
         return "room/findRoom";
     }
     
-
-    @GetMapping("/room/findByNumber")
+    @GetMapping("/findByNumber")
     public String getRoomByNumber(@RequestParam String roomNumber, Model model) {
         List<Room> rooms = roomApiService.findByRoomNumber(roomNumber);
 
@@ -44,7 +42,7 @@ public class RoomController {
         return "room/findRoom";
     }
 
-    @GetMapping("/room/getAllRooms")
+    @GetMapping("/getAllRooms")
     public String getAllRooms(Model model) {
         List<Room> rooms = roomApiService.findAll(); 
         if(hasRoom(rooms)){
@@ -53,7 +51,7 @@ public class RoomController {
         return "room/findRoom";
     }
     
-    @GetMapping("/room/getRoomByCampus")
+    @GetMapping("/getRoomByCampus")
     public String getRoomByCampus(@RequestParam String campus, Model model) {
         List<Room> rooms = roomApiService.findByCampus(campus);
 
@@ -72,7 +70,7 @@ public class RoomController {
         return "room/findRoom";
     }
 
-    @GetMapping("/room/getByBuildCode")
+    @GetMapping("/getByBuildCode")
     public String getMethodName(@RequestParam String buildCode, Model model) {
         List<Room> rooms = roomApiService.findByBuildCode(buildCode);
         model.addAttribute("resultsTitle", "Rooms in this building");

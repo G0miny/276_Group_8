@@ -25,10 +25,11 @@ public class StudySpaceFeedback {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-
     private User user; 
+    
     private int amenitiesRating; 
-    private int noiseRating; 
+    private int noiseRating;
+    private int cleanlinessRating;  
     private String comment; 
     private LocalDateTime createdAt; 
     /// leave for now
@@ -63,6 +64,14 @@ public class StudySpaceFeedback {
     
     public Room getRoom() {
         return room;
+    }
+
+    public int getCleanlinessRating(){
+        return cleanlinessRating; 
+    }
+
+    public void setCleanlinessRating(int cleanlinessRating){
+        this.cleanlinessRating = cleanlinessRating; 
     }
     
     public void setStudySpace(Room room) {
@@ -108,5 +117,4 @@ public class StudySpaceFeedback {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
-    
 }

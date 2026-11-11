@@ -10,4 +10,5 @@ import com.example.demo.models.StudySpaceFeedback;
 public interface StudySpaceFeedbackRepository extends JpaRepository <StudySpaceFeedback, Integer> {
     // List<StudySpaceFeedback> findRoomByRating();
     List<StudySpaceFeedback> findByRoom(Room room); 
+    List<StudySpaceFeedback> findByRoomId(Long id); 
 }

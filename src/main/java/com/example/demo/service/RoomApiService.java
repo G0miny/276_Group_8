@@ -84,7 +84,15 @@ public class RoomApiService {
         return roomRepository.findByBuildCode(buildCode); 
     }
 
+    public List<Room> findByRoomCode(String roomCode){
+        return roomRepository.findByRoomCode(roomCode); 
+    }
+
     public boolean hasRoom(){
         return roomRepository.count() > 0; 
+    }
+    
+    public int size(){
+        return (int)roomRepository.count();  
     }
 }
