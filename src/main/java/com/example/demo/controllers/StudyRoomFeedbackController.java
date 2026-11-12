@@ -9,21 +9,24 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import jakarta.servlet.http.HttpSession;
 
 import com.example.demo.Repository.RoomRepository;
 import com.example.demo.Repository.StudySpaceFeedbackRepository;
+import com.example.demo.Repository.UserRepository;
 import com.example.demo.models.Room;
 import com.example.demo.models.StudySpaceFeedback;
+import com.example.demo.models.User;
 import com.example.demo.service.RoomApiService;
 import com.example.demo.service.StudySpaceFeedbackService;
 
 import org.springframework.ui.Model;
 
 @Controller 
-// @RequestMapping("/study-space")
 public class StudyRoomFeedbackController {
 
     @Autowired 
@@ -38,16 +41,28 @@ public class StudyRoomFeedbackController {
     @Autowired 
     private StudySpaceFeedbackService feedbackService; 
 
+    @Autowired 
+    private UserRepository usersRepository; 
+
     private final int MIN_RATING = 0; 
     private final int MAX_RATING = 5; 
 
+    /// Session based 
+    /// check if a user is logged in by using httpsession 
+    /// check if the session(loggedInUser) if so, get the user
+    /// if user is logged in, then pass the user in to write a review
+    /// feedback has a user, store there and use the data 
+    /// mybe store user reviews later? 
     public StudyRoomFeedbackController (StudySpaceFeedbackRepository studyFeedbackRepository, 
                                         RoomRepository roomRepository, 
-                                        RoomApiService roomApiService, StudySpaceFeedbackService feedbackService ){
+                                        RoomApiService roomApiService, StudySpaceFeedbackService feedbackService, 
+                                        UserRepository userRepository
+                                    ){
         this.studyFeedbackRepository = studyFeedbackRepository; 
         this.roomRepository = roomRepository; 
         this.roomApiService = roomApiService;              
-        this.feedbackService = feedbackService;                        
+        this.feedbackService = feedbackService;                      
+        this.usersRepository = userRepository;   
     }
     
     @GetMapping("/search")
@@ -69,25 +84,6 @@ public class StudyRoomFeedbackController {
         return "studyspace/search";
     }
 
-    @PostMapping("/feedback")
-    public StudySpaceFeedback addFeedback(@RequestBody StudySpaceFeedback feebback){
-        return studyFeedbackRepository.save(feebback); 
-    }
-
-    @GetMapping("/{id}/write-revirew")
-    public String writeReview(String id, Model model){
-        Room room = roomRepository.findById(Integer.parseInt(id)).orElse(null); 
-        if(room == null){
-            model.addAttribute("error", "room is does not exist!"); 
-            return "redirect:/study-space/search";
-        }
-
-        model.addAttribute("room", room); 
-        model.addAttribute("feedback", new StudySpaceFeedback()); 
-
-        return "redirect:/study-space/write-review"; 
-    }
-
     @GetMapping("/studyroom")
     public String getStudyRoom(@RequestParam("id") String id, Model model) {
        Room room = roomRepository.findById(Integer.parseInt(id)).orElse(null); 
@@ -97,6 +93,7 @@ public class StudyRoomFeedbackController {
                 "Room does not exist!"
             );
        }
+       
        // if the rooms reviews are null, throw error also
        // it can be confusing just going back to the search
 
@@ -123,16 +120,26 @@ public class StudyRoomFeedbackController {
     // that way we can create that association with the feedback and room
     // pass the room id 
     @GetMapping("/write-review")
-    public String getWriteReview(@RequestParam ("id") String roomId, Model model) {
+    public String getWriteReview(@RequestParam ("id") String roomId, 
+                                Model model, 
+                                HttpSession session, 
+                                RedirectAttributes redirectAttributes) {
+    
         Room room = roomRepository.findById(Integer.parseInt(roomId)).orElse(null); 
         if(room == null){
-            model.addAttribute("error", "room is does not exist!"); 
-            return "redirect:/studyroom/" + roomId;
+            model.addAttribute("roomError", "room is does not exist!"); 
+            return "redirect:/studyroom?id=" + roomId;
         }
 
-        // model.addAttribute("roomId", roomId); 
+        User user = (User)session.getAttribute("loggedInUser"); 
+        if(user == null){
+            redirectAttributes.addFlashAttribute("userError", "Must be logged in to write a review!");
+            return "redirect:/studyroom?id=" + roomId;
+        }
+
         model.addAttribute("room",room); 
         model.addAttribute("feedback", new StudySpaceFeedback());
+        model.addAttribute("user", user); 
 
         return "studyspace/write-review"; 
     }
@@ -140,7 +147,17 @@ public class StudyRoomFeedbackController {
     @PostMapping("/search/{roomId}/review")
     public String submitReview(@PathVariable("roomId") String roomId, 
                                @ModelAttribute StudySpaceFeedback feedback,
-                               Model model ){
+                               HttpSession session,
+                               Model model,
+                               RedirectAttributes redirectAttributes){
+        User user = (User)session.getAttribute("loggedInUser"); 
+        if(user == null){
+            redirectAttributes.addFlashAttribute(
+                "userError", "Must be logged in to write a review!"
+            ); 
+            return "redirect:/studyroom?id=" + roomId;
+        }
+
         Room room = roomRepository.findById(Integer.parseInt(roomId)).orElse(null); 
         if(room == null){
             return "redirect:/studyspace/studyroom/" + roomId;
@@ -152,15 +169,16 @@ public class StudyRoomFeedbackController {
             !checkRating(feedback.getAmenitiesRating()) ||
             !checkRating(feedback.getCleanlinessRating())){
 
-            model.addAttribute("error", "Ratings must be between 0 and 5.");
+            model.addAttribute("ratingError", "Ratings must be between 0 and 5.");
             model.addAttribute("room", room);
             model.addAttribute("feedback", new StudySpaceFeedback());
+            model.addAttribute("user", user); 
 
             return "studyspace/write-review";
         }
-
         
         feedback.setRoom(room);
+        feedback.setUser(user);
         studyFeedbackRepository.save(feedback); 
 
         return "redirect:/studyroom?id=" + roomId;

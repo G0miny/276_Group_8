@@ -4,9 +4,6 @@
 
     </head>
     <body>
-        <p th:if="${error}"
-            th:text="${error}" 
-            style="color: red"></p>
         <form th:action="@{/findRoom}" th:method="get">
             <h3>Search Study Room by Room Number...</h3>
             <input type="text" id="roomCode" name="roomCode" placeholder="Enter Room Code..."/>

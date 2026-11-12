@@ -8,8 +8,13 @@
         <h1 th:text="${room.id}"></h1>
         <h3>Room</h3>
         <p th:text="${room.roomCode}"></p>
-        <p  th:if="${error}"
-            th:text="${error}"
+        <p  th:if="${ratingError}"
+            th:text="${ratingError}"
+            style="color: red">
+        </p>
+        <p  
+            th:if="${userError}"
+            th:text="${userError}"
             style="color: red">
         </p>
         <form 
