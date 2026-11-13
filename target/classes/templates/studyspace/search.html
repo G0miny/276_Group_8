@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+    </head>
+    <body>
+        <form th:action="@{/findRoom}" th:method="get">
+            <h3>Search Study Room by Room Number...</h3>
+            <input type="text" id="roomCode" name="roomCode" placeholder="Enter Room Code..."/>
+            <button type="submit">Find Room</button>
+        </form>
+        <div th:each="room : ${rooms}">
+            <label>Room Number</label>
+            <a 
+                style="border: 5px solid #000" 
+                th:href="@{'/studyroom?id=' + ${room.id}}">
+                <h3 th:text="${room.roomCode}"></h3>
+            </a>
+            
+        </div>
+    </body>
+</html>

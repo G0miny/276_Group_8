@@ -10,4 +10,5 @@ public interface RoomRepository extends JpaRepository<Room, Integer>{
     List<Room> findByCampus(String campus);
     List<Room> findByBuildCode(String buildCode);
     boolean existsByRoomCode(String roomCode);
+    List<Room> findByRoomCode(String roomCode);
 }

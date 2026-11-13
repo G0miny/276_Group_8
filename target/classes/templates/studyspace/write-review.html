@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+    </head>
+    <body>
+        <h1>Add new Comment</h1>
+        <h1 th:text="${room.id}"></h1>
+        <h3>Room</h3>
+        <p th:text="${room.roomCode}"></p>
+        <p  th:if="${ratingError}"
+            th:text="${ratingError}"
+            style="color: red">
+        </p>
+        <p  
+            th:if="${userError}"
+            th:text="${userError}"
+            style="color: red">
+        </p>
+        <p  
+            th:if="${commentError}"
+            th:text="${commentError}"
+            style="color: red">
+        </p>
+        <form 
+            th:action="@{/search/{roomId}/review(roomId=${room.id})}" 
+            th:object="${feedback}" 
+            method="post" >
+           
+            <h3>amenitiesRating</h3>
+            <input type="number" th:field="*{amenitiesRating}"/>
+
+            <h3>noiseRating</h3>
+            <input type="number" th:field="*{noiseRating}"/>
+
+            <h3>cleanlinessRating</h3>
+            <input type="number" th:field="*{cleanlinessRating}"/>
+
+            <h3>Comments</h3>
+            <textarea th:field="*{comment}"></textarea>
+            <button type="submit">Add feedback</button>
+        </form>
+    </body>
+</html>

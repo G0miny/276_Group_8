@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    </head>
+    <body>
+        <h1>Building</h1>
+        <p th:text="${room.roomCode}"></p>
+        <h3>amenitiesRating</h3>
+        <p th:text="${#numbers.formatDecimal(amentites, 1, 1)} + '/5'"></p>
+        <h3>noiseRating</h3>
+        <p th:text="${#numbers.formatDecimal(noise, 1, 1)} + '/5'"></p>
+        <h3>cleanlinessRating</h3>
+        <p th:text="${#numbers.formatDecimal(cleanliness, 1, 1)} + '/5'"></p>        
+        <h2>Comments</h2>
+        <div th:each="review : ${reviews}">
+            <h3 th:text="${review.user.username}"></h3>
+            <p th:text="${review.comment}"></p>
+        </div>
+        <p 
+            th:if="${roomError}"
+            th:text="${roomError}" 
+            style="color: red">
+        </p>
+        <p 
+            th:if="${userError}"
+            th:text="${userError}" 
+            style="color: red">
+        </p>
+        <a            
+            th:href="@{'/write-review?id=' + ${room.id}}">
+            Write Review
+        </a>
+    </body>
+</html>
