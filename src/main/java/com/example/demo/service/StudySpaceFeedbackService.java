@@ -11,7 +11,6 @@ import com.example.demo.models.StudySpaceFeedback;
 public class StudySpaceFeedbackService {
 
     private final double EMPTYLIST = 0.00; 
-    private List<String> comments = new ArrayList<>();
 
     // improve later
     public double calculateAverageNoise(List<StudySpaceFeedback> reviews) {

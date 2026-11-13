@@ -17,6 +17,11 @@
             th:text="${userError}"
             style="color: red">
         </p>
+        <p  
+            th:if="${commentError}"
+            th:text="${commentError}"
+            style="color: red">
+        </p>
         <form 
             th:action="@{/search/{roomId}/review(roomId=${room.id})}" 
             th:object="${feedback}" 
