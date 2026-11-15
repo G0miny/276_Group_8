@@ -1,6 +1,9 @@
 package com.example.demo.controllers;
 
 import java.util.List;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -46,6 +49,8 @@ public class StudyRoomFeedbackController {
         this.feedbackService = feedbackService;                      
     }
     
+    /// ADD how many days since they last worte the review
+
     @GetMapping("/search")
     public String studySpaceHome() {
         return "studyspace/search";
@@ -165,9 +170,11 @@ public class StudyRoomFeedbackController {
 
             return "studyspace/write-review";
         }
-        
+   
         feedback.setRoom(room);
         feedback.setUser(user);
+        feedback.setCreatedAt(LocalDateTime.now());
+        System.out.println("DATE ADD: " + feedback.getDaysSinceReview());
         studyFeedbackRepository.save(feedback); 
 
         return "redirect:/studyroom?id=" + roomId;
@@ -176,4 +183,6 @@ public class StudyRoomFeedbackController {
     private boolean checkRating(double rating){
         return rating >= MIN_RATING && rating <= MAX_RATING; 
     }
+
+    
 }

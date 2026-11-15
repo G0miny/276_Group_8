@@ -15,8 +15,9 @@
         <h2>Comments</h2>
         <div th:each="review : ${reviews}">
             <h3 th:text="${review.user.username}"></h3>
-            <span th:text="${#numbers.formatDecimal(review.averageRating ?: 0, 1, 1)}">
+            <span th:text="${#numbers.formatDecimal(review.averageRating ?: 0, 1, 1)}"></span>
             <p th:text="${review.comment}"></p>
+            <p th:text="${review.daysSinceReview} + ' days ago'"></p>        
         </div>
         <p 
             th:if="${roomError}"

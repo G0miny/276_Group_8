@@ -1,6 +1,8 @@
 package com.example.demo.models;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 import javax.swing.text.StyledEditorKit.BoldAction;
 
@@ -131,5 +133,12 @@ public class StudySpaceFeedback {
     
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public long getDaysSinceReview(){
+        LocalDate startDate = createdAt.toLocalDate(); 
+        LocalDate currentDate = LocalDate.now(); 
+
+        return ChronoUnit.DAYS.between(startDate, currentDate);
     }
 }
