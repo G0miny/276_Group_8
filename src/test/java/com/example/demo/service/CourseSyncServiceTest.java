@@ -39,7 +39,7 @@ public class CourseSyncServiceTest {
     @Test
     void testCourseSync() {
 
-        // 1. Synchronize CMPT 276 with SFU
+        // Synchronize CMPT 276 with SFU
         courseSyncService.syncCourse(2026, "fall", "cmpt", "276");
 
         // 2. Check that the course exists
@@ -50,7 +50,7 @@ public class CourseSyncServiceTest {
 
         assertEquals("276", course.getCourseNumber());
 
-        // 3. Check that sections were saved
+        // Check that sections were saved
         List<CourseSections> sections =
                 courseSectionsRepository.findByCourse(course);
 
@@ -66,7 +66,7 @@ public class CourseSyncServiceTest {
 
         int sectionsBefore = sections.size();
 
-        // 5. Synchronize the same course again
+        // Synchronize the same course again
         courseSyncService.syncCourse(2026, "fall", "cmpt", "276");
 
         List<CourseSections> sectionsAfter =
@@ -77,7 +77,7 @@ public class CourseSyncServiceTest {
                         sessionRepository.findBySection(section).size())
                 .sum();
 
-        // 6. Check that duplicate records were not created
+        // Check that duplicate records were not created
         assertEquals(sectionsBefore, sectionsAfter.size());
         assertEquals(sessionsBefore, sessionsAfter);
     }

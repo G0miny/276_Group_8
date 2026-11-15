@@ -1,0 +1,75 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Timetable</title>
+
+    <link rel="stylesheet" href="/css/planner.css?v=2">
+    <script src="/js/planner.js?v=2" defer></script>
+</head>
+<body>
+    <a href="/dashboard" class="back-button">← Back to Dashboard</a>
+    
+    <h1>My Timetable</h1>
+    <p>Search for SFU courses and build your timetable.</p>
+
+    <!-- Search for courses -->
+    <section>
+        <h2>Find Courses</h2>
+
+        <form id="courseForm">
+
+            <label for="year">Year</label>
+            <input type="number" id="year" value="2026" required>
+
+            <label for="term">Term</label>
+            <select id="term">
+                <option value="fall">Fall</option>
+                <option value="spring">Spring</option>
+                <option value="summer">Summer</option>
+            </select>
+
+            <label for="department">Department</label>
+            <input type="text" id="department" value="CMPT" required>
+
+            <label for="course">Course</label>
+            <input type="text" id="course" value="276" required>
+
+            <button type="submit">Search</button>
+        </form>
+
+        <p id="searchStatus"></p>
+
+        <div id="courseResults"></div>
+    </section>
+
+    <!-- Student's saved courses -->
+    <section>
+        <h2>My Selected Courses</h2>
+
+        <p id="savedStatus"></p>
+
+        <div id="savedCourses"></div>
+    </section>
+
+    <!-- Weekly timetable -->
+    <section>
+        <h2>Weekly Timetable</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Day</th>
+                    <th>Classes</th>
+                </tr>
+            </thead>
+
+            <tbody id="weeklyTimetable"></tbody>
+        </table>
+    </section>
+
+</body>
+</html>
