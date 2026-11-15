@@ -4,6 +4,7 @@
     </head>
     <body>
         <h1>Building</h1>
+        <h1 th:text="${#numbers.formatDecimal(average, 1, 1)} + '/5'"></h1>
         <p th:text="${room.roomCode}"></p>
         <h3>amenitiesRating</h3>
         <p th:text="${#numbers.formatDecimal(amentites, 1, 1)} + '/5'"></p>
@@ -14,6 +15,7 @@
         <h2>Comments</h2>
         <div th:each="review : ${reviews}">
             <h3 th:text="${review.user.username}"></h3>
+            <span th:text="${#numbers.formatDecimal(review.averageRating ?: 0, 1, 1)}">
             <p th:text="${review.comment}"></p>
         </div>
         <p 

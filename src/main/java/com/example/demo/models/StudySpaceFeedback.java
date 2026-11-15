@@ -32,6 +32,7 @@ public class StudySpaceFeedback {
     private int cleanlinessRating;  
     private String comment; 
     private LocalDateTime createdAt; 
+    private double averageRating; 
     /// leave for now
     private Integer numberOfChairs;
     private BoldAction hasWhiteBorad; 
@@ -40,14 +41,18 @@ public class StudySpaceFeedback {
     public StudySpaceFeedback() {}
     
     public StudySpaceFeedback(Room room, User user,
-                              int amenitiesRating, int noiseRating,
-                              String comment, LocalDateTime createdAt) {
+                              int amenitiesRating, 
+                              int noiseRating,
+                              String comment, 
+                              LocalDateTime createdAt, 
+                              double averageRating) {
         this.room = room;
         this.user = user;
         this.amenitiesRating = amenitiesRating;
         this.noiseRating = noiseRating;
         this.comment = comment;
         this.createdAt = createdAt;
+        this.averageRating = averageRating; 
     }
 
     public long getId() {
@@ -96,6 +101,16 @@ public class StudySpaceFeedback {
     
     public int getNoiseRating() {
         return noiseRating;
+    }
+    
+    public void setAverageRating( double averageRating){
+        this.averageRating = averageRating; 
+    }
+
+    public double getAverageRating(){
+       return averageRating = (getAmenitiesRating() 
+                            + getCleanlinessRating()
+                            + getNoiseRating())/ 3.0; 
     }
     
     public void setNoiseRating(int noiseRating) {

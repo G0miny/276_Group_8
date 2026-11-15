@@ -11,4 +11,6 @@ public interface StudySpaceFeedbackRepository extends JpaRepository <StudySpaceF
     // List<StudySpaceFeedback> findRoomByRating();
     List<StudySpaceFeedback> findByRoom(Room room); 
     List<StudySpaceFeedback> findByRoomId(Long id); 
+
+    
 }

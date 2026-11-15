@@ -9,9 +9,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
-
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -151,16 +151,15 @@ public class StudyRoomFeedbackControllerTest {
             .thenReturn(Optional.empty()); 
 
             mockMvc.perform(post("/search/275/review")
-            .sessionAttr("loggedInUser", user)
-            .param("amenitiesRating", "4")
-            .param("noiseRating", "3")
-            .param("cleanlinessRating", "5")
-            .param("comment", "Good study room"))
-            .andExpect(status().isNotFound());
+                .sessionAttr("loggedInUser", user)
+                .param("amenitiesRating", "4")
+                .param("noiseRating", "3")
+                .param("cleanlinessRating", "5")
+                .param("comment", "Good study room"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/studyspace/studyroom/275"));
 
         verify(studyFeedbackRepository, never())
             .save(any(StudySpaceFeedback.class));
     }
-
-    
 }

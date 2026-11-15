@@ -18,7 +18,6 @@ import com.example.demo.Repository.StudySpaceFeedbackRepository;
 import com.example.demo.models.Room;
 import com.example.demo.models.StudySpaceFeedback;
 import com.example.demo.models.User;
-import com.example.demo.service.RoomApiService;
 import com.example.demo.service.StudySpaceFeedbackService;
 
 import org.springframework.ui.Model;
@@ -40,12 +39,10 @@ public class StudyRoomFeedbackController {
 
     public StudyRoomFeedbackController (StudySpaceFeedbackRepository studyFeedbackRepository, 
                                         RoomRepository roomRepository, 
-                                        // RoomApiService roomApiService,
                                         StudySpaceFeedbackService feedbackService
                                     ){
         this.studyFeedbackRepository = studyFeedbackRepository; 
         this.roomRepository = roomRepository; 
-        // this.roomApiService = roomApiService;              
         this.feedbackService = feedbackService;                      
     }
     
@@ -53,18 +50,29 @@ public class StudyRoomFeedbackController {
     public String studySpaceHome() {
         return "studyspace/search";
     }
- 
+
     @GetMapping("/findRoom")
     public String findRoomByRoomNumber(@RequestParam("roomCode") String roomCode, Model model){
-        List<Room> rooms = roomRepository.findByRoomCode(roomCode); 
+        List<Room> rooms = roomRepository.findByRoomCode(roomCode);
+        Room room = null; 
+        
+        if(!rooms.isEmpty()){
+            room = rooms.get(0);
+        }
+
         if(rooms.isEmpty()){
             model.addAttribute("error", 
             "Room " 
             +  roomCode 
             + " was not found"); 
         }
+
+        List <StudySpaceFeedback> reviews = studyFeedbackRepository.findByRoom(room); 
+        double averageRating = Math.round(feedbackService.calculateAverageRating(reviews) * 100.0) / 100.0;        
         
         model.addAttribute("rooms", rooms); 
+        model.addAttribute("averageRating", averageRating); 
+        
         return "studyspace/search";
     }
 
@@ -81,12 +89,14 @@ public class StudyRoomFeedbackController {
        double averageNoise = feedbackService.calculateAverageNoise(reviews); 
        double averageAmenities = feedbackService.calculateAverageAmenitites(reviews); 
        double averageCleanliness = feedbackService.calculateAverageCleanliness(reviews); 
-
+       double averageRating = feedbackService.calculateAverageRating(reviews); 
+       
        model.addAttribute("room", room);
        model.addAttribute("reviews", reviews); 
        model.addAttribute("noise", averageNoise); 
        model.addAttribute("amentites", averageAmenities); 
        model.addAttribute("cleanliness", averageCleanliness); 
+       model.addAttribute("average", averageRating); 
 
        return "studyspace/review"; 
     }
@@ -129,7 +139,7 @@ public class StudyRoomFeedbackController {
             ); 
             return "redirect:/studyroom?id=" + roomId;
         }
-
+        
         Room room = roomRepository.findById(Integer.parseInt(roomId)).orElse(null); 
         if(room == null){
             return "redirect:/studyspace/studyroom/" + roomId;

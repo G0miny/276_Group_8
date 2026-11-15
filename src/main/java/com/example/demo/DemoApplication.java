@@ -20,7 +20,7 @@ public class DemoApplication {
     @Bean
     CommandLineRunner initDefaultAccounts(UserRepository userRepository) {
         return args -> {
-            // Create default Admin if 'admin' doesn't exist yet
+            // Create default Admin if 'admin' doesn't exist yet    
             if (!userRepository.existsByUsername("admin")) {
                 User admin = new User("admin", "admin@example.com", "admin123", RoleType.ADMIN);
                 userRepository.save(admin);

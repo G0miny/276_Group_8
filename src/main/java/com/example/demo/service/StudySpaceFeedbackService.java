@@ -1,6 +1,5 @@
 package com.example.demo.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -50,5 +49,20 @@ public class StudySpaceFeedbackService {
         }
 
         return (total/reviews.size()); 
+    }
+
+    public double calculateAverageRating(List<StudySpaceFeedback> reviews){
+        if(reviews == null || reviews.isEmpty()){
+            return EMPTYLIST; 
+        }
+
+        double total = 0;
+        for( StudySpaceFeedback review : reviews){
+            total += (review.getCleanlinessRating() 
+                        + review.getAmenitiesRating()
+                        + review.getNoiseRating()); 
+        }
+        
+        return total / (reviews.size() * 3); 
     }
 }

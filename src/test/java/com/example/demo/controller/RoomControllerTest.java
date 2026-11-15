@@ -58,7 +58,6 @@ public class RoomControllerTest {
                 .andExpect(model().attribute("rooms", List.of(room)));
     }
 
-
     @Test
     void testGetAllRooms() throws Exception {
         Room room1 = new Room(
@@ -92,7 +91,6 @@ public class RoomControllerTest {
                 .andExpect(model().attribute("rooms", rooms));
     }
 
-
     @Test
     void testGetRoomsByCampus() throws Exception {
 
@@ -116,7 +114,6 @@ public class RoomControllerTest {
                 .andExpect(view().name("room/findRoom"))
                 .andExpect(model().attribute("rooms", rooms));
     }
-
 
     @Test
     void testGetRoomsByBuildCode() throws Exception {
