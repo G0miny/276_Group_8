@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SFU Room Map & Pathfinder</title>
+    <title>SFU Room Map Pathfinder</title>
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
@@ -153,7 +153,7 @@
             <div id="routeDetails" class="route-card">
                 <p><strong>Distance:</strong> <span id="routeDistance">0</span> meters</p>
                 <p><strong>Est. Walking Time:</strong> <span id="routeTime">0</span> minutes</p>
-                <p style="font-size: 0.8rem; color: #777;">*Calculated using campus walking pace (~80 m/min).</p>
+                <p style="font-size: 0.8rem; color: #777;">*Estimated at 80 meters/minute walking pace.</p>
             </div>
         </div>
     </div>
@@ -163,32 +163,29 @@
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // Initialize map centered at SFU Burnaby Campus
     const burnabyCoords = [49.2781, -122.9199];
     const map = L.map('map').setView(burnabyCoords, 16);
 
-    // Add OpenStreetMap base tile layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '&copy; OpenStreetMap contributors | Simon Fraser University'
     }).addTo(map);
 
     let allRooms = [];
-    let displayedRooms = [];
     let markerLayerGroup = L.layerGroup().addTo(map);
     let routePolyline = null;
 
-    // Fetch rooms from backend endpoint
     fetch('/api/rooms/data')
         .then(response => {
             if (!response.ok) throw new Error('Network error fetching room dataset');
             return response.json();
         })
         .then(data => {
-            // Keep rooms with valid coordinates
             allRooms = data.filter(r => r.latitude != null && r.longitude != null);
             populateBuildingDropdown(allRooms);
-            filterAndRenderRooms();
+            populateSelectOptions(allRooms);
+            renderMarkers(allRooms);
+            updateBadgeCount(allRooms.length, data.length);
         })
         .catch(err => {
             console.error('Failed to load room coordinates:', err);
@@ -219,24 +216,16 @@
         const startSelect = document.getElementById('startRoomSelect');
         const destSelect = document.getElementById('destRoomSelect');
 
-        const curStart = startSelect.value;
-        const curDest = destSelect.value;
-
         startSelect.innerHTML = '<option value="">Select origin room...</option>';
         destSelect.innerHTML = '<option value="">Select destination room...</option>';
 
         const sorted = [...rooms].sort((a, b) => (a.roomCode || '').localeCompare(b.roomCode || ''));
 
         sorted.forEach(room => {
-            const label = `${room.roomCode || room.roomNumber} (${room.buildCode || 'N/A'}) - Fl: ${room.floor || 'N/A'}`;
-            const opt1 = new Option(label, room.roomCode);
-            const opt2 = new Option(label, room.roomCode);
-            startSelect.add(opt1);
-            destSelect.add(opt2);
+            const label = `${room.roomCode || room.roomNumber} (${room.buildCode || 'N/A'}) - Floor: ${room.floor || 'N/A'}`;
+            startSelect.add(new Option(label, room.roomCode));
+            destSelect.add(new Option(label, room.roomCode));
         });
-
-        if (curStart) startSelect.value = curStart;
-        if (curDest) destSelect.value = curDest;
     }
 
     function renderMarkers(rooms) {
@@ -252,102 +241,98 @@
                 fillOpacity: 0.85
             });
 
-            const popupContent = `
-                <div style="font-size: 13px; line-height: 1.4;">
-                    <strong style="color: #CC0633; font-size: 14px;">${room.roomCode || room.roomNumber}</strong><br/>
-                    <b>Building:</b> ${room.buildingName || 'N/A'} (${room.buildCode || 'N/A'})<br/>
-                    <b>Floor:</b> ${room.floor || 'N/A'}<br/>
-                    <b>Campus:</b> ${room.campus || 'N/A'}<br/>
-                    <b>Category:</b> ${room.roomCategory || 'N/A'}<br/>
-                    <div style="margin-top: 8px; display: flex; gap: 6px;">
-                        <button onclick="selectAsStart('${room.roomCode}')" style="background:#CC0633; color:#fff; border:none; padding:4px 8px; border-radius:3px; cursor:pointer; font-size:11px;">Set as Start</button>
-                        <button onclick="selectAsDest('${room.roomCode}')" style="background:#444; color:#fff; border:none; padding:4px 8px; border-radius:3px; cursor:pointer; font-size:11px;">Set as Dest</button>
+            marker.bindPopup(`
+                <div style="font-size:13px; line-height:1.4;">
+                    <strong style="color:#CC0633; font-size:14px;">${room.roomCode || room.roomNumber}</strong><br>
+                    <b>Building:</b> ${room.buildingName || room.buildCode} (${room.buildCode})<br>
+                    <b>Floor:</b> ${room.floor || 'N/A'}<br>
+                    <b>Campus:</b> ${room.campus || 'Burnaby'}<br>
+                    <div style="margin-top:8px; display:flex; gap:6px;">
+                        <button onclick="setOrigin('${room.roomCode}')" style="cursor:pointer; padding:4px 8px; font-size:11px; border:1px solid #ccc; border-radius:3px; background:#fff;">Set Start</button>
+                        <button onclick="setDestination('${room.roomCode}')" style="cursor:pointer; padding:4px 8px; font-size:11px; border:1px solid #CC0633; border-radius:3px; background:#CC0633; color:#fff;">Set Dest</button>
                     </div>
                 </div>
-            `;
+            `);
 
-            marker.bindPopup(popupContent);
             markerLayerGroup.addLayer(marker);
         });
-
-        document.getElementById('roomCount').innerText = `Showing ${rooms.length} mapped rooms`;
     }
 
-    function filterAndRenderRooms() {
-        const campusVal = document.getElementById('campusFilter').value;
-        const buildingVal = document.getElementById('buildingFilter').value;
-        const searchVal = document.getElementById('roomSearch').value.toLowerCase().trim();
+    function updateBadgeCount(mappedCount, totalCount) {
+        document.getElementById('roomCount').innerText = `${mappedCount} of ${totalCount} rooms mapped with GPS coordinates`;
+    }
 
-        displayedRooms = allRooms.filter(room => {
-            const matchesCampus = (campusVal === 'ALL') || (room.campus && room.campus.toUpperCase() === campusVal);
-            const matchesBuilding = (buildingVal === 'ALL') || (room.buildCode && room.buildCode.toUpperCase() === buildingVal);
-            const matchesSearch = !searchVal ||
-                (room.roomCode && room.roomCode.toLowerCase().includes(searchVal)) ||
-                (room.roomNumber && room.roomNumber.toLowerCase().includes(searchVal)) ||
-                (room.buildingName && room.buildingName.toLowerCase().includes(searchVal)) ||
-                (room.buildCode && room.buildCode.toLowerCase().includes(searchVal));
+    function filterRooms() {
+        const campus = document.getElementById('campusFilter').value;
+        const building = document.getElementById('buildingFilter').value;
+        const query = document.getElementById('roomSearch').value.toLowerCase().trim();
 
-            return matchesCampus && matchesBuilding && matchesSearch;
+        const filtered = allRooms.filter(r => {
+            const matchCampus = (campus === 'ALL') || (r.campus && r.campus.toUpperCase() === campus);
+            const matchBuilding = (building === 'ALL') || (r.buildCode && r.buildCode === building);
+            const matchQuery = !query ||
+                (r.roomCode && r.roomCode.toLowerCase().includes(query)) ||
+                (r.roomNumber && r.roomNumber.toLowerCase().includes(query)) ||
+                (r.buildingName && r.buildingName.toLowerCase().includes(query));
+
+            return matchCampus && matchBuilding && matchQuery;
         });
 
-        renderMarkers(displayedRooms);
-        populateSelectOptions(displayedRooms);
+        renderMarkers(filtered);
+        populateSelectOptions(filtered);
     }
 
-    window.selectAsStart = function(roomCode) {
+    document.getElementById('campusFilter').addEventListener('change', filterRooms);
+    document.getElementById('buildingFilter').addEventListener('change', filterRooms);
+    document.getElementById('roomSearch').addEventListener('input', filterRooms);
+
+    window.setOrigin = function(roomCode) {
         document.getElementById('startRoomSelect').value = roomCode;
     };
 
-    window.selectAsDest = function(roomCode) {
+    window.setDestination = function(roomCode) {
         document.getElementById('destRoomSelect').value = roomCode;
     };
 
-    // Event listeners for filters
-    document.getElementById('campusFilter').addEventListener('change', filterAndRenderRooms);
-    document.getElementById('buildingFilter').addEventListener('change', filterAndRenderRooms);
-    document.getElementById('roomSearch').addEventListener('input', filterAndRenderRooms);
-
-    // Route calculation logic
     document.getElementById('btnCalculateRoute').addEventListener('click', function() {
         const startCode = document.getElementById('startRoomSelect').value;
         const destCode = document.getElementById('destRoomSelect').value;
 
         if (!startCode || !destCode) {
-            alert('Please select both an origin and destination room.');
+            alert('Please select both a start and destination room.');
             return;
         }
 
         const startRoom = allRooms.find(r => r.roomCode === startCode);
         const destRoom = allRooms.find(r => r.roomCode === destCode);
 
-        if (!startRoom || !destRoom) {
-            alert('Selected room coordinates could not be found.');
-            return;
-        }
+        if (!startRoom || !destRoom) return;
 
         if (routePolyline) {
             map.removeLayer(routePolyline);
         }
 
-        const startPoint = L.latLng(startRoom.latitude, startRoom.longitude);
-        const destPoint = L.latLng(destRoom.latitude, destRoom.longitude);
+        const routeCoords = [
+            [startRoom.latitude, startRoom.longitude],
+            [destRoom.latitude, destRoom.longitude]
+        ];
 
-        // Draw path polyline
-        routePolyline = L.polyline([startPoint, destPoint], {
+        routePolyline = L.polyline(routeCoords, {
             color: '#CC0633',
             weight: 5,
-            opacity: 0.85,
-            dashArray: '8, 8'
+            dashArray: '8, 8',
+            opacity: 0.9
         }).addTo(map);
 
         map.fitBounds(routePolyline.getBounds(), { padding: [50, 50] });
 
-        // Calculate direct distance
-        const distanceMeters = Math.round(startPoint.distanceTo(destPoint));
-        const estimatedMinutes = (distanceMeters / 80).toFixed(1);
+        const startLatLng = L.latLng(startRoom.latitude, startRoom.longitude);
+        const destLatLng = L.latLng(destRoom.latitude, destRoom.longitude);
+        const distanceMeters = Math.round(startLatLng.distanceTo(destLatLng));
+        const walkingMinutes = (distanceMeters / 80).toFixed(1);
 
         document.getElementById('routeDistance').innerText = distanceMeters;
-        document.getElementById('routeTime').innerText = estimatedMinutes;
+        document.getElementById('routeTime').innerText = walkingMinutes;
         document.getElementById('routeDetails').style.display = 'block';
     });
 
