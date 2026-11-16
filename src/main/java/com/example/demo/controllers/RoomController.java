@@ -1,25 +1,30 @@
 package com.example.demo.controllers;
 
-import org.springframework.stereotype.Controller;
+import com.example.demo.Repository.RoomRepository;
 import com.example.demo.models.Room;
 import com.example.demo.service.RoomApiService;
-import java.util.List;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.List;
+
 @Controller
 public class RoomController {
 
     private final RoomApiService roomApiService;
+    private final RoomRepository roomRepository;
 
-    public RoomController(RoomApiService roomApiService) {
+    public RoomController(RoomApiService roomApiService, RoomRepository roomRepository) {
         this.roomApiService = roomApiService;
+        this.roomRepository = roomRepository;
     }
 
-    @GetMapping
+    @GetMapping("/room")
     public String getRoomPage() {
+        // Corrected logic: only load if database does NOT have rooms
         if (!roomApiService.hasRoom()) {
             roomApiService.loadApi();
         }
@@ -34,7 +39,16 @@ public class RoomController {
         return "map";
     }
 
-    // REST endpoint serving room data with coordinates to Leaflet
+    // Diagnostic endpoint to purge stale null-coordinate records and force a resync
+    @GetMapping("/api/rooms/force-reload")
+    @ResponseBody
+    public String forceReloadRooms() {
+        roomRepository.deleteAll();
+        roomApiService.loadApi();
+        return "Database purged and re-synced successfully with coordinate geometry!";
+    }
+
+    // REST endpoint serving JSON to the Leaflet frontend
     @GetMapping("/api/rooms/data")
     @ResponseBody
     public List<Room> getRoomsJsonData(@RequestParam(required = false) String buildCode,
@@ -58,7 +72,7 @@ public class RoomController {
         return "room/findRoom";
     }
 
-    @GetMapping("/getAllRooms")
+    @GetMapping("/room/getAllRooms")
     public String getAllRooms(Model model) {
         List<Room> rooms = roomApiService.findAll();
         if (hasRoom(rooms)) {
