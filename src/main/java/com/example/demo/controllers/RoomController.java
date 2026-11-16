@@ -18,7 +18,7 @@ public class RoomController {
         this.roomApiService = roomApiService;
     }
 
-    @GetMapping("/room")
+    @GetMapping
     public String getRoomPage() {
         if (!roomApiService.hasRoom()) {
             roomApiService.loadApi();
@@ -58,7 +58,7 @@ public class RoomController {
         return "room/findRoom";
     }
 
-    @GetMapping("/room/getAllRooms")
+    @GetMapping("/getAllRooms")
     public String getAllRooms(Model model) {
         List<Room> rooms = roomApiService.findAll();
         if (hasRoom(rooms)) {

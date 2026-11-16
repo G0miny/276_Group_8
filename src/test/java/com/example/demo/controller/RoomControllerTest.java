@@ -14,7 +14,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -59,7 +58,6 @@ public class RoomControllerTest {
                 .andExpect(model().attribute("rooms", List.of(room)));
     }
 
-
     @Test
     void testGetAllRooms() throws Exception {
         Room room1 = new Room(
@@ -93,7 +91,6 @@ public class RoomControllerTest {
                 .andExpect(model().attribute("rooms", rooms));
     }
 
-
     @Test
     void testGetRoomsByCampus() throws Exception {
 
@@ -117,7 +114,6 @@ public class RoomControllerTest {
                 .andExpect(view().name("room/findRoom"))
                 .andExpect(model().attribute("rooms", rooms));
     }
-
 
     @Test
     void testGetRoomsByBuildCode() throws Exception {
