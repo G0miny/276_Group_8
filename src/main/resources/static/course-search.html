@@ -1,6 +1,6 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,7 +12,8 @@
         body {
             font-family: Arial, sans-serif;
             background-color: #f5f5f5;
-            margin: 30px;
+            margin: 0;
+            padding: 0;        
         }
 
         h1 {
@@ -39,9 +40,21 @@
 </head>
 
 <body>
+   
+<div id="navbar-container"></div>
+    <script>
+        fetch("/")
+            .then(response => response.text())
+            .then(html => {
+                const page = new DOMParser().parseFromString(html, "text/html");
+                const navbar = page.querySelector("header.navbar");
 
-    <a href="/home">Back to Home</a>
-
+                if (navbar) {
+                    document.getElementById("navbar-container").replaceWith(navbar);
+                }
+            })
+            .catch(error => console.error("Navbar error:", error));
+    </script>
     <h1>Search SFU Courses</h1>
     <p>Find available courses and sections at SFU.</p>
 

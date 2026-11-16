@@ -7,13 +7,14 @@
 </head>
 <body class="bg-light">
 
-<nav class="navbar navbar-dark bg-dark px-4 mb-4">
+<!-- <nav class="navbar navbar-dark bg-dark px-4 mb-4">
     <span class="navbar-brand fw-bold">Summit SFU</span>
     <div class="d-flex align-items-center gap-2">
         <a th:if="${user.role.name() == 'ADMIN'}" href="/admin/dashboard" class="btn btn-danger btn-sm">Admin Panel</a>
         <a href="/logout" class="btn btn-outline-light btn-sm">Logout</a>
     </div>
-</nav>
+</nav> -->
+<div th:replace="~{fragments/navbar :: navbar}"></div>
 
 <div class="container">
     <div class="card shadow-sm border-0 p-4 mb-4">
@@ -38,12 +39,15 @@
                 <input type="password" name="newPassword" class="form-control" placeholder="••••••••">
             </div>
             <div class="col-12">
-                <button type="submit" class="btn btn-dark">Save Changes</button>
+                <button type="submit" class="btn"
+                        style="background-color: #a80028; 
+                        color: white;">
+                        Save Changes
+                </button>
             </div>
         </form>
     </div>
 
-<!-- My Timetable -->
 <div class="card shadow-sm border-0 p-4 mt-4">
     <h5 class="fw-bold mb-3">My Timetable</h5>
 
@@ -52,7 +56,9 @@
     </p>
 
     <div>
-        <a href="/timetable" class="btn btn-dark">
+        <a  href="/timetable" 
+            class="btn"
+            style="background-color: #a80028; color: white;">
             Open Timetable
         </a>
     </div>

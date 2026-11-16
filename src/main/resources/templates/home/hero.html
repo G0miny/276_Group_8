@@ -195,41 +195,10 @@
 </head>
 
 <body>
-
-    <header class="navbar">
-
-        <a class="logo" href="/" th:href="@{/}">
-            SFU | Summit
-        </a>
-
-        <nav class="nav-links">
-            <a href="/" th:href="@{/}"
-               class="active"
-               aria-current="page">
-                Home
-            </a>
-
-            <a href="/login" th:href="@{/login}">
-                Login
-            </a>
-
-                <a href="/room" th:href="@{/room}">
-                    Find Rooms
-                </a>
-                <a href="/course-search.html">
-                    Search Courses
-                </a>
-            <a href="/register" th:href="@{/register}">
-                Register
-            </a>
-        </nav>
-
-    </header>
-
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
     <main class="container">
 
         <section class="hero">
-
             <p class="hero-label">
                 SIMON FRASER UNIVERSITY
             </p>
@@ -244,7 +213,6 @@
             </p>
 
             <div class="buttons">
-
                 <a class="button primary-button"
                    href="/room"
                    th:href="@{/room}">
@@ -252,15 +220,13 @@
                 </a>
 
                 <a class="button secondary-button"
-                   href="/login"
-                   th:href="@{/login}">
-                    Login
+                    th:if="${session.loggedInUser == null}"
+                    href="/login"
+                    th:href="@{/login}">
+                        Login
                 </a>
-
             </div>
-
         </section>
-
         <section class="features">
 
             <div class="feature-card">

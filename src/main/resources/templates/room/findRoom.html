@@ -130,7 +130,9 @@
     </style>
 </head>
 <body th:attr="data-search-type=${searchType != null ? searchType : 'number'}">
-<a class="skip-link" href="#main">Skip to room search</a>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<!-- <a class="skip-link" href="#main">Skip to room search</a> -->
+
 
 <!-- Shared inline icons: no CDN or icon library needed. -->
 <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="display:none">
@@ -141,7 +143,7 @@
     <symbol id="i-door" viewBox="0 0 24 24"><path d="M5 21V3h14v18M3 21h18M9 3v18m6-9h1"/></symbol>
 </svg>
 
-<header class="topbar">
+<!-- <header class="topbar">
     <div class="wrap header-inner">
         <a class="brand" th:href="@{/}" aria-label="Summit SFU room finder">
             <span class="brand-mark" aria-hidden="true"><svg width="28" height="23" viewBox="0 0 28 23" fill="none"><path d="m3 18 8-13 8 13H3Zm12-9 3-5 8 14h-5" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span>
@@ -149,7 +151,7 @@
         </a>
         <nav aria-label="Main navigation"><a class="nav-link" href="/room" th:href="@{/room}" aria-current="page"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>Room finder</a></nav>
     </div>
-</header>
+</header> -->
 
 <main class="wrap" id="main">
     <section class="hero" aria-labelledby="page-title">

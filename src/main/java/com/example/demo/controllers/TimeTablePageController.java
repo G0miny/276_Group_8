@@ -22,8 +22,12 @@ public class TimeTablePageController {
         }
 
         return "timetable/planner";
-        
     }
-    
+
+    @GetMapping("/course-search")
+    public String showCourseSearch() {
+        return "course-search";
+    }
+        
     
 }

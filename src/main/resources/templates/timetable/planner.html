@@ -4,19 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>My Timetable</title>
-
     <link rel="stylesheet" href="/css/planner.css?v=2">
     <script src="/js/planner.js?v=2" defer></script>
 </head>
 <body>
-    <a href="/dashboard" class="back-button">← Back to Dashboard</a>
-    
-    <h1>My Timetable</h1>
-    <p>Search for SFU courses and build your timetable.</p>
-
-    <!-- Search for courses -->
+    <!-- <a href="/dashboard" class="back-button">← Back to Dashboard</a> -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
     <section>
         <h2>Find Courses</h2>
 

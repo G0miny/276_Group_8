@@ -1,0 +1,113 @@
+
+<header class="navbar" th:fragment="navbar">
+
+    <style>
+        .navbar {
+            background: #a80028;
+            color: white;
+            padding: 18px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 0;
+        }
+
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+
+        .nav-links .active {
+            font-weight: bold;
+            border-bottom: 2px solid white;
+        }
+
+        @media (max-width: 650px) {
+            .navbar {
+                flex-direction: column;
+                padding: 18px;
+            }
+
+            .nav-links {
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 18px;
+            }
+        }
+    </style>
+
+    <a class="logo" href="/" th:href="@{/}">
+        SFU | Summit
+    </a>
+
+    <nav class="nav-links"
+         th:with="navUser=${session == null ? null : session.loggedInUser}">
+
+        <a href="/" th:href="@{/}">
+            Home
+        </a>
+
+        <a href="/course-search.html" th:href="@{/course-search.html}">
+            Search Courses
+        </a>
+
+        <a href="/room" th:href="@{/room}">
+            Find Rooms
+        </a>
+
+        <a href="/map" th:href="@{/map}">
+            Map
+        </a>
+
+        <a href="/search" th:href="@{/search}">
+            Study Spaces
+        </a>
+
+        <a th:if="${navUser == null}"
+           href="/login" th:href="@{/login}">
+            Login
+        </a>
+
+        <a th:if="${navUser == null}"
+           href="/register" th:href="@{/register}">
+            Register
+        </a>
+
+        <a th:if="${navUser != null and navUser.role.name() == 'USER'}"
+           href="/dashboard" th:href="@{/dashboard}">
+            Dashboard
+        </a>
+
+        <a th:if="${navUser != null and navUser.role.name() == 'ADMIN'}"
+           href="/admin/dashboard" th:href="@{/admin/dashboard}">
+            Dashboard
+        </a>
+
+        <a th:if="${navUser != null}"
+           href="/logout" th:href="@{/logout}">
+            Logout
+        </a>
+    </nav>
+</header>
