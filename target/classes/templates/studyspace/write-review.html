@@ -1,44 +1,314 @@
+
 <!DOCTYPE html>
-<html>
-    <head>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Write Review | SFU StudySpace</title>
 
-    </head>
-    <body>
-        <h1>Add new Comment</h1>
-        <h1 th:text="${room.id}"></h1>
-        <h3>Room</h3>
-        <p th:text="${room.roomCode}"></p>
-        <p  th:if="${ratingError}"
-            th:text="${ratingError}"
-            style="color: red">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            color: #222;
+        }
+
+        header {
+            background: #a80028;
+            color: white;
+            padding: 20px 8%;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .page-title {
+            font-size: 32px;
+            margin: 0 0 10px;
+        }
+
+        .subtitle {
+            color: #777;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        /* Room information */
+
+        .room-info {
+            background: white;
+            border: 1px solid #ddd;
+            border-left: 5px solid #cc0633;
+            border-radius: 8px;
+            padding: 20px 25px;
+            margin-bottom: 25px;
+        }
+
+        .room-info h3 {
+            margin: 0 0 8px;
+            font-size: 14px;
+            color: #777;
+        }
+
+        .room-code {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 0 0 8px;
+        }
+
+        .room-id {
+            font-size: 12px;
+            color: #888;
+            margin: 0;
+        }
+
+        /* Review form */
+
+        .form-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 30px;
+        }
+
+        .section-title {
+            font-size: 21px;
+            margin: 0 0 8px;
+        }
+
+        .section-description {
+            font-size: 14px;
+            color: #777;
+            margin: 0 0 25px;
+        }
+
+        .rating-fields {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .field h3 {
+            font-size: 14px;
+            margin: 0 0 10px;
+        }
+
+        .field input {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+            background: white;
+        }
+
+        .field input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #cc0633;
+        }
+
+        .rating-hint {
+            color: #888;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        .comment-section {
+            margin-top: 25px;
+        }
+
+        .comment-section h3 {
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: vertical;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        .submit-button {
+            background: #cc0633;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 14px 28px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 22px;
+        }
+
+        .submit-button:hover {
+            background: #a80028;
+        }
+
+
+        .error {
+            background: #ffe6eb;
+            color: #a80028;
+            border: 1px solid #f2b8c4;
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 650px) {
+            .container {
+                margin-top: 25px;
+            }
+
+            .rating-fields {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .form-card {
+                padding: 20px;
+            }
+
+            .page-title {
+                font-size: 27px;
+            }
+
+            .submit-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        SFU | StudySpace
+    </header>
+
+    <main class="container">
+
+        <h1 class="page-title">Add new Comment</h1>
+
+        <p class="subtitle">
+            Share your experience and help other students find
+            a better place to study.
         </p>
-        <p  
-            th:if="${userError}"
-            th:text="${userError}"
-            style="color: red">
+
+        <!-- Room information -->
+        <div class="room-info">
+
+            <h3>Room</h3>
+
+            <p class="room-code"
+               th:text="${room.roomCode}">
+            </p>
+
+            <p class="room-id">
+                Room ID:
+                <span th:text="${room.id}"></span>
+            </p>
+
+        </div>
+        <p class="error"
+           th:if="${ratingError}"
+           th:text="${ratingError}">
         </p>
-        <p  
-            th:if="${commentError}"
-            th:text="${commentError}"
-            style="color: red">
+
+        <p class="error"
+           th:if="${userError}"
+           th:text="${userError}">
         </p>
-        <form 
-            th:action="@{/search/{roomId}/review(roomId=${room.id})}" 
-            th:object="${feedback}" 
-            method="post" >
-           
-            <h3>amenitiesRating</h3>
-            <input type="number" th:field="*{amenitiesRating}"/>
 
-            <h3>noiseRating</h3>
-            <input type="number" th:field="*{noiseRating}"/>
+        <p class="error"
+           th:if="${commentError}"
+           th:text="${commentError}">
+        </p>
 
-            <h3>cleanlinessRating</h3>
-            <input type="number" th:field="*{cleanlinessRating}"/>
+        <form
+            class="form-card"
+            th:action="@{/search/{roomId}/review(roomId=${room.id})}"
+            th:object="${feedback}"
+            method="post">
 
-            <h3>Comments</h3>
-            <textarea th:field="*{comment}"></textarea>
-            <button type="submit">Add feedback</button>
+            <h2 class="section-title">Rate this study room</h2>
+
+            <p class="section-description">
+                Give each category a rating from 0 to 5.
+            </p>
+
+            <div class="rating-fields">
+
+                <div class="field">
+                    <h3>Amenities</h3>
+
+                    <input
+                        type="number"
+                        th:field="*{amenitiesRating}"
+                    />
+
+                    <p class="rating-hint">Rating out of 5</p>
+                </div>
+
+                <div class="field">
+                    <h3>Noise</h3>
+
+                    <input
+                        type="number"
+                        th:field="*{noiseRating}"
+                    />
+
+                    <p class="rating-hint">Rating out of 5</p>
+                </div>
+
+                <div class="field">
+                    <h3>Cleanliness</h3>
+
+                    <input
+                        type="number"
+                        th:field="*{cleanlinessRating}"
+                    />
+
+                    <p class="rating-hint">Rating out of 5</p>
+                </div>
+
+            </div>
+
+            <div class="comment-section">
+
+                <h3>Comments</h3>
+
+                <textarea
+                    th:field="*{comment}">
+                </textarea>
+
+            </div>
+
+            <button class="submit-button" type="submit">
+                Add feedback
+            </button>
+
         </form>
-    </body>
+
+    </main>
+
+</body>
 </html>

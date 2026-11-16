@@ -1,37 +1,375 @@
+
 <!DOCTYPE html>
-<html>
-    <head>
-    </head>
-    <body>
-        <h1>Building</h1>
-        <h1 th:text="${#numbers.formatDecimal(average, 1, 1)} + '/5'"></h1>
-        <p th:text="${room.roomCode}"></p>
-        <h3>amenitiesRating</h3>
-        <p th:text="${#numbers.formatDecimal(amentites, 1, 1)} + '/5'"></p>
-        <h3>noiseRating</h3>
-        <p th:text="${#numbers.formatDecimal(noise, 1, 1)} + '/5'"></p>
-        <h3>cleanlinessRating</h3>
-        <p th:text="${#numbers.formatDecimal(cleanliness, 1, 1)} + '/5'"></p>        
-        <h2>Comments</h2>
-        <div th:each="review : ${reviews}">
-            <h3 th:text="${review.user.username}"></h3>
-            <span th:text="${#numbers.formatDecimal(review.averageRating ?: 0, 1, 1)}"></span>
-            <p th:text="${review.comment}"></p>
-            <p th:text="${review.daysSinceReview} + ' days ago'"></p>        
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SFU StudySpace Reviews</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            color: #222;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background: #a80028;
+            color: white;
+            padding: 18px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 0;
+        }
+
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+
+        .nav-links .active {
+            font-weight: bold;
+            border-bottom: 2px solid white;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .room-title {
+            font-size: 42px;
+            margin: 5px 0 25px;
+        }
+
+        .rating-card {
+            display: flex;
+            gap: 35px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 25px;
+        }
+
+        .overall {
+            min-width: 200px;
+            text-align: center;
+            border-right: 1px solid #ddd;
+            padding-right: 35px;
+        }
+
+        .overall h1 {
+            color: #a80028;
+            font-size: 58px;
+            margin: 15px 0 5px;
+        }
+
+        .overall p {
+            color: #777;
+            font-size: 14px;
+        }
+
+        .breakdown {
+            flex: 1;
+        }
+
+        .breakdown h2 {
+            font-size: 20px;
+            margin: 0 0 20px;
+        }
+
+        .rating-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .rating-label {
+            width: 95px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .bar {
+            flex: 1;
+            height: 12px;
+            background: #e5e5e5;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: #cc0633;
+            border-radius: 10px;
+        }
+
+        .rating-value {
+            width: 65px;
+            text-align: right;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        /* Reviews */
+        .reviews-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 35px 0 20px;
+            gap: 15px;
+        }
+
+        .reviews-header h2 {
+            margin: 0;
+            font-size: 25px;
+        }
+
+        .review-button {
+            background: #cc0633;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .review-button:hover {
+            background: #a80028;
+        }
+
+        .review-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 22px;
+            margin-bottom: 15px;
+        }
+
+        .review-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .review-top h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .review-score {
+            background: #fce5eb;
+            color: #a80028;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        .review-date {
+            color: #888;
+            font-size: 12px;
+            margin: 5px 0;
+        }
+
+        .review-comment {
+            line-height: 1.6;
+            margin-bottom: 0;
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;
+        }
+
+        .error {
+            background: #ffe6eb;
+            color: #a80028;
+            border: 1px solid #f2b8c4;
+            padding: 12px;
+            border-radius: 6px;
+        }
+
+        /* Mobile */
+        @media (max-width: 650px) {
+            .navbar {
+                flex-direction: column;
+                padding: 18px;
+            }
+
+            .nav-links {
+                gap: 22px;
+            }
+
+            .rating-card {
+                flex-direction: column;
+            }
+
+            .overall {
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+                padding: 0 0 20px;
+            }
+
+            .rating-label {
+                width: 85px;
+            }
+
+            .reviews-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation Bar -->
+    <header class="navbar">
+        <div class="logo">SFU | StudySpace</div>
+
+        <nav class="nav-links">
+            <a th:href="@{/home}">Home</a>
+            <a th:href="@{/search}">Find Rooms</a>
+            <a class="active" aria-current="page">Reviews</a>
+        </nav>
+    </header>
+
+    <main class="container">
+
+        <p>BUILDING</p>
+
+        <h1 class="room-title"
+            th:text="${room.roomCode}">
+        </h1>
+
+        <section class="rating-card">
+
+            <div class="overall">
+                <h1 th:text="${#numbers.formatDecimal(average, 1, 1)} + '/5'"></h1>
+                <p>Overall Rating</p>
+            </div>
+
+            <div class="breakdown">
+
+                <h2>Rating Breakdown</h2>
+
+                <div class="rating-row">
+                    <span class="rating-label">Amenities</span>
+
+                    <div class="bar">
+                        <div class="bar-fill"
+                             th:style="|width: ${amentites * 20}%;|">
+                        </div>
+                    </div>
+
+                    <span class="rating-value"
+                          th:text="${#numbers.formatDecimal(amentites, 1, 1)} + '/5'">
+                    </span>
+                </div>
+
+                <div class="rating-row">
+                    <span class="rating-label">Noise</span>
+
+                    <div class="bar">
+                        <div class="bar-fill"
+                             th:style="|width: ${noise * 20}%;|">
+                        </div>
+                    </div>
+
+                    <span class="rating-value"
+                          th:text="${#numbers.formatDecimal(noise, 1, 1)} + '/5'">
+                    </span>
+                </div>
+
+                <div class="rating-row">
+                    <span class="rating-label">Cleanliness</span>
+
+                    <div class="bar">
+                        <div class="bar-fill"
+                             th:style="|width: ${cleanliness * 20}%;|">
+                        </div>
+                    </div>
+
+                    <span class="rating-value"
+                          th:text="${#numbers.formatDecimal(cleanliness, 1, 1)} + '/5'">
+                    </span>
+                </div>
+
+            </div>
+
+        </section>
+
+        <p class="error"
+           th:if="${roomError}"
+           th:text="${roomError}">
+        </p>
+
+        <p class="error"
+           th:if="${userError}"
+           th:text="${userError}">
+        </p>
+
+        <div class="reviews-header">
+            <h2>Student Reviews</h2>
+
+            <a class="review-button"
+               th:href="@{'/write-review?id=' + ${room.id}}">
+                Write Review
+            </a>
         </div>
-        <p 
-            th:if="${roomError}"
-            th:text="${roomError}" 
-            style="color: red">
-        </p>
-        <p 
-            th:if="${userError}"
-            th:text="${userError}" 
-            style="color: red">
-        </p>
-        <a            
-            th:href="@{'/write-review?id=' + ${room.id}}">
-            Write Review
-        </a>
-    </body>
+
+        <div class="review-card"
+             th:each="review : ${reviews}">
+
+            <div class="review-top">
+                <h3 th:text="${review.user.username}"></h3>
+
+                <span class="review-score"
+                      th:text="${#numbers.formatDecimal(review.averageRating ?: 0, 1, 1)} + '/5'">
+                </span>
+            </div>
+
+            <p class="review-date"
+               th:text="${review.daysSinceReview} + ' days ago'">
+            </p>
+
+            <p class="review-comment"
+               th:text="${review.comment}">
+            </p>
+
+        </div>
+
+    </main>
+
+</body>
 </html>

@@ -14,65 +14,80 @@
         body {
             margin: 0;
             font-family: Arial, Helvetica, sans-serif;
-            background: #f8f9fb;
-            color: #171717;
+            background: #f5f5f5;
+            color: #222;
         }
 
+        /* Navigation Bar */
         .navbar {
-            background: #ffffff;
-            border-bottom: 1px solid #e8e8e8;
-            padding: 20px 7%;
+            background: #a80028;
+            color: white;
+            padding: 18px 8%;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 20px;
         }
 
         .logo {
-            font-size: 23px;
-            font-weight: 800;
-            letter-spacing: -1px;
+            font-size: 22px;
+            font-weight: bold;
+            white-space: nowrap;
         }
 
-        .logo span {
-            color: #1967e8;
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 30px;
         }
 
-        .campus-label {
-            color: #777;
-            font-size: 13px;
-            font-weight: 600;
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 0;
         }
 
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+
+        .nav-links .active {
+            font-weight: bold;
+            border-bottom: 2px solid white;
+        }
+
+        /* Search Section */
         .hero {
-            background: #ffffff;
+            background: white;
             text-align: center;
-            padding: 95px 20px 90px;
-            border-bottom: 1px solid #eaeaea;
+            padding: 85px 20px;
+            border-bottom: 1px solid #e5e5e5;
         }
 
         .eyebrow {
             display: inline-block;
-            background: #edf3ff;
-            color: #1967e8;
+            background: #fce5eb;
+            color: #a80028;
             font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            padding: 10px 17px;
-            border-radius: 50px;
-            margin-bottom: 22px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            padding: 9px 15px;
+            border-radius: 20px;
+            margin-bottom: 20px;
         }
 
         .hero h1 {
-            font-size: clamp(36px, 6vw, 58px);
-            font-weight: 800;
-            letter-spacing: -2.5px;
-            margin: 0 0 14px;
+            font-size: clamp(36px, 6vw, 55px);
+            letter-spacing: -2px;
+            margin: 0 0 15px;
         }
 
         .hero-description {
-            font-size: 17px;
+            font-size: 16px;
             color: #777;
-            margin-bottom: 40px;
+            margin-bottom: 35px;
         }
 
         .search-container {
@@ -90,23 +105,21 @@
         .search-box {
             display: flex;
             align-items: center;
-            background: #ffffff;
-            border: 2px solid #e4e7ed;
-            border-radius: 14px;
-            padding: 7px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 6px;
             gap: 8px;
-            box-shadow: 0 8px 28px rgba(0,0,0,0.05);
-            transition: border-color 0.2s;
         }
 
         .search-box:focus-within {
-            border-color: #1967e8;
+            border-color: #cc0633;
         }
 
         .search-box input {
             flex: 1;
             min-width: 0;
-            padding: 15px 17px;
+            padding: 15px;
             border: none;
             outline: none;
             font-size: 16px;
@@ -114,34 +127,33 @@
         }
 
         .search-box button {
-            background: #1967e8;
+            background: #cc0633;
             color: white;
             border: none;
-            border-radius: 9px;
-            padding: 16px 25px;
+            border-radius: 6px;
+            padding: 15px 24px;
             font-size: 14px;
-            font-weight: 700;
+            font-weight: bold;
             cursor: pointer;
-            transition: background 0.2s;
         }
 
         .search-box button:hover {
-            background: #1052c4;
+            background: #a80028;
         }
 
+        /* Room Results */
         .results {
-            max-width: 1050px;
+            max-width: 1000px;
             margin: 0 auto;
-            padding: 60px 24px 100px;
+            padding: 55px 20px 90px;
         }
 
         .section-heading {
-            margin-bottom: 28px;
+            margin-bottom: 25px;
         }
 
         .section-heading h2 {
             font-size: 27px;
-            letter-spacing: -0.7px;
             margin: 0 0 8px;
         }
 
@@ -153,66 +165,67 @@
 
         .room-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            grid-template-columns: repeat(
+                auto-fill,
+                minmax(260px, 1fr)
+            );
             gap: 18px;
         }
 
         .room-card a {
             display: block;
-            background: #ffffff;
-            border: 1px solid #e9e9e9;
-            border-radius: 14px;
-            padding: 26px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 25px;
             text-decoration: none;
-            color: inherit;
-            transition: 0.2s ease;
+            color: #222;
         }
 
         .room-card a:hover {
-            transform: translateY(-3px);
-            border-color: #1967e8;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.07);
+            border-color: #cc0633;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
         }
 
         .room-label {
             display: block;
             font-size: 12px;
-            font-weight: 700;
+            font-weight: bold;
             color: #777;
             text-transform: uppercase;
-            letter-spacing: 1px;
             margin-bottom: 15px;
         }
 
         .room-card h3 {
-            font-size: 30px;
-            font-weight: 800;
-            letter-spacing: -1px;
-            margin: 0 0 20px;
+            font-size: 28px;
+            font-weight: bold;
+            margin: 0 0 15px;
+        }
+
+        .room-card h3:nth-of-type(2) {
+            font-size: 20px;
+            color: #a80028;
         }
 
         .view-details {
             font-size: 13px;
-            font-weight: 700;
-            color: #1967e8;
+            font-weight: bold;
+            color: #cc0633;
         }
 
-        /* Footer */
-        .footer {
-            border-top: 1px solid #e8e8e8;
-            padding: 28px;
-            text-align: center;
-            font-size: 12px;
-            color: #999;
-        }
-
-        @media (max-width: 600px) {
+        /* Mobile */
+        @media (max-width: 650px) {
             .navbar {
-                padding: 18px 22px;
+                flex-direction: column;
+                padding: 18px;
+            }
+
+            .nav-links {
+                gap: 22px;
             }
 
             .hero {
-                padding: 70px 20px;
+                padding: 65px 20px;
             }
 
             .search-box {
@@ -225,7 +238,7 @@
             }
 
             .results {
-                padding-top: 45px;
+                padding-top: 40px;
             }
         }
     </style>
@@ -233,14 +246,28 @@
 
 <body>
 
+    <!-- Navigation Bar -->
     <header class="navbar">
-        <div class="logo">SFU<span>Summit.</span></div>
-        <div class="campus-label">SIMON FRASER UNIVERSITY</div>
+        <div class="logo">SFU | Summit</div>
+
+        <nav class="nav-links">
+            <a th:href="@{/home}">Home</a>
+            <a th:href="@{/search}"
+               class="active"
+               aria-current="page">
+                Find Rooms
+            </a>
+        </nav>
     </header>
 
     <main>
+
+        <!-- Search -->
         <section class="hero">
-            <div class="eyebrow">SFU STUDY SPACE REVIEWS</div>
+
+            <div class="eyebrow">
+                SFU STUDY SPACE REVIEWS
+            </div>
 
             <h1>Find your next<br>study spot.</h1>
 
@@ -248,7 +275,8 @@
                 Search campus rooms and discover student reviews.
             </p>
 
-            <form th:action="@{/findRoom}" th:method="get"
+            <form th:action="@{/findRoom}"
+                  th:method="get"
                   class="search-container">
 
                 <h3>Search Study Room by Room Number...</h3>
@@ -261,23 +289,36 @@
                         placeholder="Enter Room Code..."
                     />
 
-                    <button type="submit">Find Room</button>
+                    <button type="submit">
+                        Find Room
+                    </button>
                 </div>
+
             </form>
+
         </section>
 
+        <!-- Search Results -->
         <section class="results">
+
             <div class="section-heading">
                 <h2>Explore study rooms</h2>
                 <p>Select a room to view its details and reviews.</p>
             </div>
 
             <div class="room-grid">
-                <div class="room-card" th:each="room : ${rooms}">
+
+                <div class="room-card"
+                     th:each="room : ${rooms}">
+
                     <a th:href="@{'/studyroom?id=' + ${room.id}}">
-                        <label class="room-label">Room Number</label>
+
+                        <label class="room-label">
+                            Room Number
+                        </label>
 
                         <h3 th:text="${room.roomCode}"></h3>
+
                         <h3 th:text="${averageRating}"></h3>
 
                         <span class="view-details">
@@ -289,7 +330,10 @@
                 </div>
 
             </div>
+
         </section>
+
     </main>
+
 </body>
 </html>
