@@ -4,9 +4,14 @@
 
 CMPT 276 Group Project Proposal, Group 8
 
-GitHub: https://github.com/notwinston/276_Group_8
+GitHub: https://github.com/G0miny/276_Group_8
 
-Render: https://two76-group-8.onrender.com/
+Render: https://cmpt276g8-d9jl.onrender.com
+
+Map feature: https://cmpt276g8-d9jl.onrender.com/map 
+
+(Will make some button or map icon in main page)
+ - directs to "/map" page when user clicked
 
 ## 1. Project Abstract
 
