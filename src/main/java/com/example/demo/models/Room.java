@@ -1,41 +1,35 @@
 package com.example.demo.models;
 
 import java.io.Serializable;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-@Entity 
+@Entity
 @Table(name = "rooms")
-public class Room implements Serializable{
-    private static final long serialVersionUID = 1L; 
-    
-    @Id 
+public class Room implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; 
+    private Long id;
 
-    private String roomCode; 
-    private String buildCode; 
-    private String buildingName; 
-    private String roomNumber; 
-    private String floor; 
-    private String campus; 
-    private String roomCategory; 
+    private String roomCode;
+    private String buildCode;
+    private String buildingName;
+    private String roomNumber;
+    private String floor;
+    private String campus;
+    private String roomCategory;
+    private Double latitude;
+    private Double longitude;
 
-    public Room(){}
+    public Room() {}
 
-    public Room(
-        String roomCode,
-        String buildCode,
-        String buildingName,
-        String roomNumber,
-        String floor,
-        String campus,
-        String roomCategory) {
-
+    public Room(String roomCode, String buildCode, String buildingName, 
+                String roomNumber, String floor, String campus, String roomCategory) {
         this.roomCode = roomCode;
         this.buildCode = buildCode;
         this.buildingName = buildingName;
@@ -107,5 +101,21 @@ public class Room implements Serializable{
 
     public void setRoomCategory(String roomCategory) {
         this.roomCategory = roomCategory;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
     }
 }
