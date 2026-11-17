@@ -181,11 +181,30 @@
             return response.json();
         })
         .then(data => {
-            allRooms = data.filter(r => r.latitude != null && r.longitude != null);
+            const seenCodes = new Set();
+            allRooms = data.filter(r => {
+                if(r.latitude ==null || r.longitude == null || !r.roomCode) {
+                    return false;
+                }
+                if (seenCodes.has(r.roomCode)) {
+                    return false; // Skips duplicate record
+                }
+                seenCodes.add(r.roomCode);
+                return true;
+            });
             populateBuildingDropdown(allRooms);
             populateSelectOptions(allRooms);
             renderMarkers(allRooms);
-            updateBadgeCount(allRooms.length, data.length);
+
+            if (typeof updateBadgeCount == 'function'){
+                updateBadgeCount(allRooms.length, allRooms.length);
+            }
+            else{
+                const countElem = document.getElementById('roomCount');
+                if (countElem) {
+                    countElem.innerText = `${allRooms.length} mapped rooms`;
+                }
+            }
         })
         .catch(err => {
             console.error('Failed to load room coordinates:', err);

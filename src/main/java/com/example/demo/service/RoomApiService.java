@@ -25,7 +25,7 @@ public class RoomApiService {
         this.roomRepository = roomRepository;
     }
 
-    public void loadApi() {
+    public synchronized void loadApi() {
         if (hasRoom()) {
             System.out.println("Room table already populated. Skipping sync.");
             return;
