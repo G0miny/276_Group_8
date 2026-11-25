@@ -1,8 +1,11 @@
 package com.example.demo.models;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -20,7 +23,14 @@ public class Room implements Serializable {
 
     @Column(unique = true)
     private String roomCode;
-    
+
+    // this is optional
+    // sfu has no images when in its api
+    // this is soley for the "new" rooms requested by students
+    @ElementCollection
+    @Column(columnDefinition = "TEXT")
+    private List<String> imageUrl = new ArrayList<>();
+
     private String buildCode;
     private String buildingName;
     private String roomNumber;
@@ -49,6 +59,14 @@ public class Room implements Serializable {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public List<String> getImageUrl() {
+        return imageUrl;
+    }
+    
+    public void setImageUrl(List<String> imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public String getRoomCode() {

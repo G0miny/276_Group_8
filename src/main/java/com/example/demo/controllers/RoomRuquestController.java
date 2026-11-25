@@ -2,7 +2,7 @@ package com.example.demo.controllers;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ModelAttribute;
 
 import com.example.demo.models.RoomRequest;
 import com.example.demo.models.User;
@@ -10,22 +10,25 @@ import com.example.demo.service.RoomRequestService;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.ui.Model;
 import jakarta.servlet.http.HttpSession;
-
 
 @Controller 
 public class RoomRuquestController {
     private RoomRequestService roomRequestService; 
 
-    @GetMapping("/roomRequest")
-    public String getRoomRequestPage(@RequestParam String param) {
-        return "request/makeRequestPage"; 
+    public RoomRuquestController(RoomRequestService roomRequestService){
+        this.roomRequestService = roomRequestService; 
+    }
+
+    @GetMapping("/room-request-form")
+    public String getRoomRequestPage(Model model) {
+        model.addAttribute("roomRequest", new RoomRequest()); 
+        return "room-request/room-request-form";
     }
 
     @PostMapping("/request")
-    public String postMethodName(@RequestBody RoomRequest roomRequest, 
+    public String submitRequest(@ModelAttribute("roomRequest") RoomRequest roomRequest, 
                                  Model model, 
                                  HttpSession session, 
                                  RedirectAttributes redirectAttributes
@@ -34,25 +37,10 @@ public class RoomRuquestController {
         if(user == null){
             redirectAttributes.addFlashAttribute("userError", 
                                                  "Must be logged in to write a review!");
-            return "redirect:/roomRequest";
+            return "redirect:/room-request-form";
         }
         
         roomRequestService.saveRequest(roomRequest, user); 
-        return "redirect:/roomRequest";
+        return "redirect:/room-request-form";
     }
-
-    
-
-
-
-
-
-
-
-    
-
-    
-    
-    
-    
 }

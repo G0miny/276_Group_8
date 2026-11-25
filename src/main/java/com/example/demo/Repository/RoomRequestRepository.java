@@ -8,6 +8,6 @@ import com.example.demo.enums.RequestType;
 import com.example.demo.models.RoomRequest;
 
 public interface RoomRequestRepository extends JpaRepository<RoomRequest, Integer> {
-    long countByStatus(RequestType status); 
+   long countByStatus(RequestType status); 
    List<RoomRequest> findByStatus(RequestType status);
 }

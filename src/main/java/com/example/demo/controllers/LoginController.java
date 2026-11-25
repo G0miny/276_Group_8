@@ -1,17 +1,28 @@
 package com.example.demo.controllers;
 
 import com.example.demo.Repository.UserRepository;
+import com.example.demo.enums.RequestType;
 import com.example.demo.enums.RoleType;
+import com.example.demo.models.RoomRequest;
 import com.example.demo.models.User;
+import com.example.demo.service.RoomRequestService;
 
 import jakarta.servlet.http.HttpSession;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 
 @Controller
 public class LoginController {
@@ -19,8 +30,12 @@ public class LoginController {
     @Autowired
     private UserRepository userRepository;
 
-    public LoginController(UserRepository userRepository){
+    private RoomRequestService roomRequestService; 
+
+    public LoginController(UserRepository userRepository,
+                           RoomRequestService roomRequestService){
         this.userRepository = userRepository; 
+        this.roomRequestService = roomRequestService; 
     }
 
     // @GetMapping("/login")
@@ -138,8 +153,13 @@ public class LoginController {
         if (user.getRole() != RoleType.ADMIN) {
             return "redirect:/dashboard"; // Kick non-admins back to user dashboard
         }
+        
         model.addAttribute("user", user);
         model.addAttribute("users", userRepository.findAll());
+        // counts number of pending request currently not handled
+        model.addAttribute("pendingRequestCount", roomRequestService.pendingStatus()); 
+        model.addAttribute("pendingRequests", roomRequestService.getRequestByStatus(RequestType.PENDING));
+        
         return "admin_dashboard";
     }
 
@@ -175,6 +195,115 @@ public class LoginController {
             userRepository.deleteById(uid);
         }
         return "redirect:/admin/dashboard";
+    }
+
+    @GetMapping("/admin/room-request")
+    public String getRoomRequest(
+            Model model,
+            @RequestParam(required = false) RequestType status,
+            HttpSession session) {
+    
+        User user = (User) session.getAttribute("loggedInUser");
+        if (user == null || user.getRole() != RoleType.ADMIN) {
+            return "redirect:/login";
+        }
+    
+        List<RoomRequest> requestList;
+        if (status == null) {
+            requestList = roomRequestService.getAllRoomRequests();
+        } else {
+            requestList = roomRequestService.getRequestByStatus(status);
+        }
+       
+        Map<Long, Boolean> existingRooms = getExistingRooms(requestList); 
+
+        model.addAttribute("existingRooms", existingRooms);
+        model.addAttribute("requests", requestList);
+        model.addAttribute("status", status);
+    
+        return "admin-room-request";
+    }
+
+    private Map<Long, Boolean> getExistingRooms(List<RoomRequest> requestList) {
+        Map<Long, Boolean> map = new HashMap<>();
+        for (RoomRequest request : requestList) {
+            map.put(
+                request.getId(),
+                roomRequestService.roomExists(request.getRoomCode())
+            );
+        }
+        
+        return map;
+    }
+
+    /// end point for handleing rejected, approved and pending
+    /// We pass in the id of the request and change it based on the end point called
+    /// approved: id is passed, we call our roomrequest service and update based on the id
+    /// changing the current status to the corresponding end-point ~ APPROVED, REJECTED, PENDING
+    @PostMapping("/admin/room-request/{id}/approve")
+    public String approveRequest(@PathVariable Long id,
+                                 HttpSession session,
+                                 RedirectAttributes redirectAttributes) {
+    
+        User user = (User) session.getAttribute("loggedInUser");
+        if (user == null || user.getRole() != RoleType.ADMIN) {
+            return "redirect:/login";
+        }
+    
+        try {
+            roomRequestService.updateRequestStatus(id, RequestType.APPROVED);
+            redirectAttributes.addFlashAttribute(
+                "success", "Room approved successfully!"
+            );
+        } catch (IllegalStateException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/admin/room-request/" + id;
+        }
+    
+        return "redirect:/admin/room-request?status=PENDING";
+    }
+
+    @PostMapping("/admin/room-request/{id}/reject")
+    public String rejectRequest(@PathVariable Long id) {
+        roomRequestService.updateRequestStatus(id, RequestType.REJECTED);
+        return "redirect:/admin/room-request?status=PENDING";
+    }
+
+    @GetMapping("/admin/room-request/count")
+    public ResponseEntity<Long> getPendingRequestCount(HttpSession session) {
+        
+        User user = (User) session.getAttribute("loggedInUser");
+        if (user == null || user.getRole() != RoleType.ADMIN) {
+            return ResponseEntity.status(403).build();
+        }
+
+        return ResponseEntity.ok(
+            roomRequestService.pendingStatus()
+        );
+    }
+
+    @GetMapping("/admin/room-request/{id}")
+    public String getIndividualRequest(@PathVariable Long id,
+                                    Model model,
+                                       HttpSession session) {
+    
+        User user = (User) session.getAttribute("loggedInUser");
+        if (user == null || user.getRole() != RoleType.ADMIN) {
+            return "redirect:/login";
+        }
+    
+        RoomRequest request = roomRequestService.getRequestById(id);
+        if (request == null) {
+            return "redirect:/admin/room-request";
+        }
+    
+        List<RoomRequest> requestList = List.of(request);
+    
+        model.addAttribute("requests", requestList);
+        model.addAttribute("existingRooms", getExistingRooms(requestList));
+        model.addAttribute("status", null);
+    
+        return "admin-room-request";
     }
 
     @GetMapping("/logout")
