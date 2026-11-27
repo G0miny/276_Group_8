@@ -14,10 +14,10 @@ import org.springframework.ui.Model;
 import jakarta.servlet.http.HttpSession;
 
 @Controller 
-public class RoomRuquestController {
+public class RoomRequestController {
     private RoomRequestService roomRequestService; 
 
-    public RoomRuquestController(RoomRequestService roomRequestService){
+    public RoomRequestController(RoomRequestService roomRequestService){
         this.roomRequestService = roomRequestService; 
     }
 

@@ -264,8 +264,20 @@ public class LoginController {
     }
 
     @PostMapping("/admin/room-request/{id}/reject")
-    public String rejectRequest(@PathVariable Long id) {
+    public String rejectRequest(@PathVariable Long id,
+                                HttpSession session,
+                                RedirectAttributes redirectAttributes) {
+    
+        User user = (User) session.getAttribute("loggedInUser");
+        if (user == null || user.getRole() != RoleType.ADMIN) {
+            return "redirect:/login";
+        }
+    
         roomRequestService.updateRequestStatus(id, RequestType.REJECTED);
+        redirectAttributes.addFlashAttribute(
+            "success", "Room request rejected successfully."
+        );
+    
         return "redirect:/admin/room-request?status=PENDING";
     }
 

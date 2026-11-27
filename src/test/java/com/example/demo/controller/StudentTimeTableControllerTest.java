@@ -1,14 +1,18 @@
-
 package com.example.demo.controller;
 
 import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+
 import org.springframework.mock.web.MockHttpSession;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.example.demo.controllers.StudentTimeTableController;
@@ -19,32 +23,32 @@ import com.example.demo.service.CourseSyncService;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class StudentTimeTableControllerTest {
 
-    @Autowired
+    @InjectMocks
     private StudentTimeTableController controller;
 
-    @MockitoBean
+    @Mock
     private UserRepository userRepository;
 
-    @MockitoBean
+    @Mock
     private StudentCourseSelectionRepository selectionRepository;
 
-    @MockitoBean
+    @Mock
     private CourseRepository courseRepository;
 
-    @MockitoBean
+    @Mock
     private CourseSectionsRepository courseSectionsRepository;
 
-    @MockitoBean
+    @Mock
     private SectionsSessionRepository sessionRepository;
 
-    @MockitoBean
+    @Mock
     private CourseSyncService courseSyncService;
 
 
-    // Create a logged-in student
     private MockHttpSession loggedIn() {
 
         User user = mock(User.class);
@@ -60,19 +64,15 @@ public class StudentTimeTableControllerTest {
     }
 
 
-    // Example course selection request
-    private StudentTimeTableController.SelectionRequest request() {
+     private StudentTimeTableController.SelectionRequest request() {
 
         return new StudentTimeTableController.SelectionRequest(
                 2026, "fall", "cmpt", "276", "D100");
     }
 
 
-    // Set up a course and section
-    private CourseSections setupSection(Course course) {
-
+     private CourseSections setupSection(Course course) {
         CourseSections section = mock(CourseSections.class);
-
         when(courseRepository
                 .findByYearAndTermAndDepartmentAndCourseNumber(
                         2026, "fall", "cmpt", "276"))
@@ -86,7 +86,6 @@ public class StudentTimeTableControllerTest {
     }
 
 
-    // User must be logged in
     @Test
     void testNotLoggedIn() {
 
@@ -101,7 +100,6 @@ public class StudentTimeTableControllerTest {
     }
 
 
-    // Empty timetable
     @Test
     void testEmptyTimetable() {
 
@@ -115,11 +113,8 @@ public class StudentTimeTableControllerTest {
         assertTrue(result.isEmpty());
     }
 
-
-    // Student can add a course
     @Test
     void testAddSection() {
-
         MockHttpSession session = loggedIn();
 
         Course course = mock(Course.class);
@@ -143,11 +138,10 @@ public class StudentTimeTableControllerTest {
 
         assertEquals("D100", result.section());
 
-        verify(selectionRepository).save(any(StudentCourseSelection.class));
+        verify(selectionRepository)
+                .save(any(StudentCourseSelection.class));
     }
 
-
-    // Same section cannot be added twice
     @Test
     void testDuplicateSection() {
 
@@ -173,10 +167,8 @@ public class StudentTimeTableControllerTest {
     }
 
 
-    // Student cannot select two lectures for one course
     @Test
     void testDuplicateLecture() {
-
         MockHttpSession session = loggedIn();
 
         Course course = mock(Course.class);
@@ -187,6 +179,7 @@ public class StudentTimeTableControllerTest {
         when(section.getSectionCode()).thenReturn("LEC");
 
         CourseSections existingSection = mock(CourseSections.class);
+
         StudentCourseSelection existingSelection =
                 mock(StudentCourseSelection.class);
 
@@ -212,11 +205,8 @@ public class StudentTimeTableControllerTest {
         verify(selectionRepository, never()).save(any());
     }
 
-
-    // Student can remove their own section
     @Test
     void testRemoveSection() {
-
         MockHttpSession session = loggedIn();
 
         User owner = mock(User.class);
@@ -234,13 +224,10 @@ public class StudentTimeTableControllerTest {
         verify(selectionRepository).delete(selection);
     }
 
-
-    // Student cannot remove another student's section
     @Test
     void testRemoveOtherStudentSection() {
 
         MockHttpSession session = loggedIn();
-
         User otherStudent = mock(User.class);
         StudentCourseSelection selection =
                 mock(StudentCourseSelection.class);
@@ -257,7 +244,6 @@ public class StudentTimeTableControllerTest {
         );
 
         assertEquals(404, error.getStatusCode().value());
-
         verify(selectionRepository, never()).delete(any());
     }
 }
