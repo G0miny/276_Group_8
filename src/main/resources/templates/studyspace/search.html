@@ -1,11 +1,9 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Find a Study Room | SFU</title>
-
     <style>
         * {
             box-sizing: border-box;
@@ -18,8 +16,7 @@
             color: #222;
         }
 
-        /* Navigation Bar */
-        .navbar {
+         .navbar {
             background: #a80028;
             color: white;
             padding: 18px 8%;
@@ -58,8 +55,7 @@
             border-bottom: 2px solid white;
         }
 
-        /* Search Section */
-        .hero {
+         .hero {
             background: white;
             text-align: center;
             padding: 85px 20px;
@@ -141,14 +137,18 @@
             background: #a80028;
         }
 
-        /* Room Results */
         .results {
             max-width: 1000px;
             margin: 0 auto;
-            padding: 55px 20px 90px;
+            padding: 55px 20px 60px;
         }
 
         .section-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 18px;
             margin-bottom: 25px;
         }
 
@@ -163,177 +163,231 @@
             margin: 0;
         }
 
+        .suggest-room {
+            display: inline-block;
+            color: #cc0633;
+            background: transparent;
+            border: 1px solid #cc0633;
+            border-radius: 6px;
+            padding: 11px 18px;
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .suggest-room:hover {
+            background: #cc0633;
+            color: white;
+        }
+
         .room-grid {
-            display: grid;
-            grid-template-columns: repeat(
-                auto-fill,
-                minmax(260px, 1fr)
-            );
-            gap: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
         }
 
         .room-card a {
-            display: block;
+            display: flex;
+            align-items: center;
+            gap: 25px;
             background: white;
             border: 1px solid #ddd;
-            border-radius: 10px;
-            padding: 25px;
+            border-radius: 8px;
+            padding: 22px;
             text-decoration: none;
             color: #222;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
         .room-card a:hover {
-            border-color: #cc0633;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            border-color: #a80028;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
         }
 
-        .room-label {
-            display: block;
-            font-size: 12px;
+        .room-rating {
+            flex-shrink: 0;
+            width: 95px;
+            text-align: center;
+        }
+
+        .rating-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 75px;
+            height: 70px;
+            margin: 0 auto 8px;
+            border-radius: 5px;
+            font-size: 30px;
             font-weight: bold;
+        }
+
+        .rating-high {
+            background: #b0eacb;
+            color: #15452e;
+        }
+
+        .rating-medium {
+            background: #ffe7a0;
+            color: #624b12;
+        }
+
+        .rating-low {
+            background: #ffc2c2;
+            color: #842029;
+        }
+
+        .rating-none {
+            background: #ededed;
             color: #777;
-            text-transform: uppercase;
-            margin-bottom: 15px;
+            font-size: 24px;
         }
 
-        .room-card h3 {
-            font-size: 28px;
-            font-weight: bold;
-            margin: 0 0 15px;
+        .rating-caption {
+            font-size: 11px;
+            color: #777;
         }
 
-        .room-card h3:nth-of-type(2) {
-            font-size: 20px;
-            color: #a80028;
+        .room-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .room-info h3 {
+            font-size: 26px;
+            margin: 0 0 7px;
+        }
+
+        .room-building {
+            font-size: 15px;
+            color: #444;
+            margin: 0 0 6px;
+        }
+
+        .room-meta {
+            color: #777;
+            font-size: 13px;
+            margin: 0 0 12px;
         }
 
         .view-details {
+            color: #a80028;
             font-size: 13px;
             font-weight: bold;
-            color: #cc0633;
         }
 
-        /* Mobile */
+        .room-arrow {
+            color: #a80028;
+            font-size: 25px;
+            font-weight: bold;
+        }
+
         @media (max-width: 650px) {
-            .navbar {
-                flex-direction: column;
-                padding: 18px;
+            .room-card a {
+                padding: 16px;
+                gap: 15px;
             }
 
-            .nav-links {
-                gap: 22px;
+            .room-rating {
+                width: 70px;
             }
 
-            .hero {
-                padding: 65px 20px;
+            .rating-box {
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
             }
 
-            .search-box {
-                flex-direction: column;
-                align-items: stretch;
+            .room-info h3 {
+                font-size: 21px;
             }
 
-            .search-box button {
-                width: 100%;
+            .room-arrow {
+                display: none;
             }
-
-            .results {
-                padding-top: 40px;
-            }
-        }
+    }
     </style>
 </head>
-
 <body>
     <div th:replace="~{fragments/navbar :: navbar}"></div>
-    <!-- Navigation Bar -->
-    <!-- <header class="navbar">
-        <div class="logo">SFU | Summit</div>
-
-        <nav class="nav-links">
-            <a th:href="@{/home}">Home</a>
-            <a th:href="@{/search}"
-               class="active"
-               aria-current="page">
-                Find Rooms
-            </a>
-        </nav>
-    </header> -->
-
     <main>
-
-        <!-- Search -->
         <section class="hero">
-
             <div class="eyebrow">
                 SFU STUDY SPACE REVIEWS
             </div>
-
             <h1>Find your next<br>study spot.</h1>
-
             <p class="hero-description">
                 Search campus rooms and discover student reviews.
             </p>
-
             <form th:action="@{/findRoom}"
                   th:method="get"
                   class="search-container">
 
                 <h3>Search Study Room by Room Number...</h3>
-
                 <div class="search-box">
-                    <input
-                        type="text"
-                        id="roomCode"
-                        name="roomCode"
-                        placeholder="Enter Room Code..."
-                    />
+                    <input type="text"
+                           id="roomCode"
+                           name="roomCode"
+                           placeholder="Enter Room Code...">
 
                     <button type="submit">
                         Find Room
                     </button>
                 </div>
-
             </form>
-
         </section>
-
-        <!-- Search Results -->
         <section class="results">
 
             <div class="section-heading">
-                <h2>Explore study rooms</h2>
-                <p>Select a room to view its details and reviews.</p>
-            </div>
-
-            <div class="room-grid">
-
-                <div class="room-card"
-                     th:each="room : ${rooms}">
-
-                    <a th:href="@{'/studyroom?id=' + ${room.id}}">
-
-                        <label class="room-label">
-                            Room Number
-                        </label>
-
-                        <h3 th:text="${room.roomCode}"></h3>
-
-                        <h3 th:text="${averageRating}"></h3>
-
-                        <span class="view-details">
-                            View room details &rarr;
-                        </span>
-
-                    </a>
-
+                <div>
+                    <h2>Explore study rooms</h2>
+                    <p>Select a room to view its details and reviews.</p>
                 </div>
-
+        
+                <a th:href="@{/room-request-form}"
+                   class="suggest-room">
+                    + Suggest a Room
+                </a>
             </div>
-
+            <div class="room-grid">
+                <div class="room-card"
+                     th:each="room : ${rooms}"
+                     th:with="rating=${averageRating ?: 0}">
+                    <a th:href="@{/studyroom(id=${room.id})}">
+                        <div class="room-rating">
+                            <div class="rating-box"
+                                 th:classappend="${rating == 0 ? 'rating-none' :
+                                                  (rating >= 4 ? 'rating-high' :
+                                                  (rating >= 3 ? 'rating-medium' :
+                                                  'rating-low'))}"
+                                 th:text="${rating == 0 ? 'N/A' :
+                                            #numbers.formatDecimal(rating, 1, 1)}">
+                            </div>
+                            <span class="rating-caption"
+                                  th:text="${rating == 0 ? 'Not yet rated' : 'Overall rating'}">
+                            </span>
+                        </div>
+                        <div class="room-info">
+                            <h3 th:text="${room.roomCode}"></h3>
+                            <p class="room-building"
+                               th:text="${room.buildingName}">
+                            </p>
+                            <p class="room-meta">
+                                <span th:text="${room.campus}"></span>
+                                &middot;
+                                <span th:text="${room.roomCategory}"></span>
+                            </p>
+                            <span class="view-details">
+                                View ratings and reviews
+                            </span>
+                        </div>
+                        <span class="room-arrow">&rsaquo;</span>
+                    </a>
+                </div>
+            </div>
         </section>
-
     </main>
-
 </body>
 </html>

@@ -24,7 +24,6 @@ public class RoomController {
 
     @GetMapping("/room")
     public String getRoomPage() {
-        // Corrected logic: only load if database does NOT have rooms
         if (!roomApiService.hasRoom()) {
             roomApiService.loadApi();
         }
@@ -93,7 +92,7 @@ public class RoomController {
         }
         return "room/findRoom";
     }
-
+    
     @GetMapping("/room/getByBuildCode")
     public String getByBuildCode(@RequestParam String buildCode, Model model) {
         List<Room> rooms = roomApiService.findByBuildCode(buildCode);
