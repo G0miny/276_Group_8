@@ -46,7 +46,6 @@ public class RoomRequestControllerTest {
 
     @Test
     void testGetRoomRequestPage() throws Exception {
-
         mockMvc.perform(get("/room-request-form"))
                 .andExpect(status().isOk())
                 .andExpect(view().name(
@@ -54,28 +53,23 @@ public class RoomRequestControllerTest {
                 .andExpect(model().attributeExists("roomRequest"));
     }
 
-   @Test
+    @Test
     void testSubmitRequestNotLoggedIn() throws Exception {
-
         mockMvc.perform(post("/request")
                 .param("roomCode", "TEST9999")
                 .param("buildingName", "Academic Quadrangle")
                 .param("campus", "Burnaby"))
-
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/room-request-form"))
                 .andExpect(flash().attribute(
                         "userError",
-                        "Must be logged in to write a review!"
+                        "Must be logged in to submit a room request!"
                 ));
-
-        verify(roomRequestService, never())
-                .saveRequest(any(RoomRequest.class), any(User.class));
+    
+        verify(roomRequestService, never()).saveRequest(any(RoomRequest.class), any(User.class));
     }
-
     @Test
     void testSubmitRequest() throws Exception {
-
         User user = mock(User.class);
 
         MockHttpSession session = new MockHttpSession();
@@ -86,15 +80,13 @@ public class RoomRequestControllerTest {
                 .param("roomCode", "TEST9999")
                 .param("buildingName", "Academic Quadrangle")
                 .param("campus", "Burnaby"))
-
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/room-request-form"));
 
-        ArgumentCaptor<RoomRequest> captor =
-                ArgumentCaptor.forClass(RoomRequest.class);
-
-        verify(roomRequestService)
-                .saveRequest(captor.capture(), same(user));
+        ArgumentCaptor<RoomRequest> captor = ArgumentCaptor.forClass(RoomRequest.class);
+        verify(roomRequestService).saveRequest(
+                                  captor.capture(), 
+                                  same(user));
 
         RoomRequest request = captor.getValue();
 
@@ -105,7 +97,6 @@ public class RoomRequestControllerTest {
 
     @Test
     void testSubmitRequestWithImage() throws Exception {
-
         User user = mock(User.class);
 
         MockHttpSession session = new MockHttpSession();
@@ -124,25 +115,20 @@ public class RoomRequestControllerTest {
                 .param("roomCode", "TEST9999")
                 .param("buildingName", "Academic Quadrangle")
                 .param("campus", "Burnaby"))
-
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/room-request-form"));
 
-        ArgumentCaptor<RoomRequest> captor =
-                ArgumentCaptor.forClass(RoomRequest.class);
+        ArgumentCaptor<RoomRequest> captor = ArgumentCaptor.forClass(RoomRequest.class);
 
-        verify(roomRequestService)
-                .saveRequest(captor.capture(), same(user));
+        verify(roomRequestService).saveRequest(
+                                  captor.capture(), 
+                                  same(user));
 
         RoomRequest request = captor.getValue();
 
         assertNotNull(request.getImage());
         assertFalse(request.getImage().isEmpty());
-
-        assertEquals("room.jpg",
-                request.getImage().getOriginalFilename());
-
-        assertEquals("image/jpeg",
-                request.getImage().getContentType());
+        assertEquals("room.jpg", request.getImage().getOriginalFilename());
+        assertEquals("image/jpeg", request.getImage().getContentType());
     }
 }

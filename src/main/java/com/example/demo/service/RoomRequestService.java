@@ -23,11 +23,14 @@ public class RoomRequestService {
 
     private final RoomRequestRepository requestRepo;
     private final RoomRepository roomRepository;
+    private final ImageValidationService imageValidationService;
 
     RoomRequestService(RoomRequestRepository requestRepo, 
-                       RoomRepository roomRepositor) {
+                       RoomRepository roomRepositor, 
+                       ImageValidationService imageValidationService) {
         this.requestRepo = requestRepo;
         this.roomRepository = roomRepositor; 
+        this.imageValidationService = imageValidationService;
     } 
 
     public long pendingStatus(){
@@ -48,20 +51,29 @@ public class RoomRequestService {
     
             String type = image.getContentType();
             if (!"image/jpeg".equals(type) && !"image/png".equals(type)) {
-                throw new IllegalArgumentException("Only JPG and PNG images are allowed.");
+                throw new IllegalArgumentException(
+                    "Only JPG and PNG images are allowed."
+                );
             }
     
             try {
                 String encoded = Base64.getEncoder()
-                                        .encodeToString
-                                        (image.getBytes());
+                                       .encodeToString(image.getBytes());
+    
+                String result = imageValidationService.validateImage(encoded, type);
+                System.out.println("AI Image Validation: " + result);
+                if ("INVALID".equals(result)) {
+                    throw new IllegalArgumentException(
+                        "Please upload an image of a room or study space."
+                    );
+                }
+    
                 String imageUrl = "data:" + type + ";base64," + encoded;
                 request.getImageUrl().add(imageUrl);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
         }
-    
         requestRepo.save(request);
     }
 
@@ -121,4 +133,5 @@ public class RoomRequestService {
     
         return exists;
     }
+
 }

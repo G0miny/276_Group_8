@@ -22,6 +22,7 @@ public class ImageValidationService {
     public String validateImage(String encodedImage, String imageType) {
 
         if (apiKey == null || apiKey.isBlank()) {
+            System.out.println("ERROR: Gemini API key is missing.");
             return "UNCERTAIN";
         }
 

@@ -28,19 +28,30 @@ public class RoomRequestController {
     }
 
     @PostMapping("/request")
-    public String submitRequest(@ModelAttribute("roomRequest") RoomRequest roomRequest, 
-                                 Model model, 
-                                 HttpSession session, 
-                                 RedirectAttributes redirectAttributes
-                                 ) {
-        User user = (User)session.getAttribute("loggedInUser"); 
-        if(user == null){
-            redirectAttributes.addFlashAttribute("userError", 
-                                                 "Must be logged in to write a review!");
+    public String submitRequest(@ModelAttribute("roomRequest") RoomRequest roomRequest,
+                                HttpSession session,
+                                RedirectAttributes redirectAttributes) {
+        User user = (User) session.getAttribute("loggedInUser");
+        if (user == null) {
+            redirectAttributes.addFlashAttribute(
+                "userError", "Must be logged in to submit a room request!"
+            );
+
             return "redirect:/room-request-form";
         }
-        
-        roomRequestService.saveRequest(roomRequest, user); 
+
+        try {
+            roomRequestService.saveRequest(roomRequest, user);
+            redirectAttributes.addFlashAttribute(
+                "success", "Room request submitted successfully!"
+            );
+
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute(
+                "userError", e.getMessage()
+            );
+        }
+
         return "redirect:/room-request-form";
     }
 }
