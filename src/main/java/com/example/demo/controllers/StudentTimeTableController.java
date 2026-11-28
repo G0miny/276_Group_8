@@ -20,6 +20,7 @@ import jakarta.servlet.http.HttpSession;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.ArrayList;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +28,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import com.example.demo.service.TimeTableConflictService;
+import com.example.demo.models.SectionSession;
 
 
 @RestController 
@@ -39,6 +43,7 @@ public class StudentTimeTableController {
     private final SectionsSessionRepository sessionRepository;
     private final StudentCourseSelectionRepository selectionRepository;
     private final UserRepository userRepository;
+    private final TimeTableConflictService conflictService;
 
     public StudentTimeTableController(
             CourseSyncService courseSyncService,
@@ -46,7 +51,9 @@ public class StudentTimeTableController {
             CourseSectionsRepository courseSectionsRepository,
             SectionsSessionRepository sessionRepository,
             StudentCourseSelectionRepository selectionRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            TimeTableConflictService conflictService) {
+        
 
         this.courseSyncService = courseSyncService;
         this.courseRepository = courseRepository;
@@ -54,6 +61,7 @@ public class StudentTimeTableController {
         this.sessionRepository = sessionRepository;
         this.selectionRepository = selectionRepository;
         this.userRepository = userRepository;
+        this.conflictService = conflictService;
     }
     
     // meeting information returned 
@@ -88,6 +96,21 @@ public class StudentTimeTableController {
         String section
     
     ) {}
+
+    public record ConflictSessionView(
+        String department,
+        String course,
+        String section,
+        String day,
+        String startTime,
+        String endTime
+    ){}
+
+    public record ConflictView(
+        ConflictSessionView first, 
+        ConflictSessionView second
+    ) {}
+    
 
 
     private User getLoggedInUser(HttpSession session) {
@@ -133,6 +156,34 @@ public class StudentTimeTableController {
             meetings
     );
     }
+    private List<SectionSession> getStudentSessions(User user) {
+
+    List<StudentCourseSelection> selections = selectionRepository.findByUser_Uid(user.getUid());
+
+    List<SectionSession> sessions = new ArrayList<>();
+
+    // Retrive all sessions from the selected sections 
+    for (StudentCourseSelection selection : selections) {
+        sessions.addAll(sessionRepository.findBySection(selection.getSection()));
+    }
+    return sessions;
+}
+
+    private ConflictSessionView toConflictSessionView(SectionSession session) {
+
+        CourseSections section = session.getSection();
+        Course course = section.getCourse();
+
+        return new ConflictSessionView(
+        course.getDepartment(),
+        course.getCourseNumber(),
+        section.getSection(),
+        session.getDay(),
+        session.getStartTime().toString(),
+        session.getEndTime().toString()
+    );
+}
+            
 
     @GetMapping
     public List<SelectionView> getMyTimetable(HttpSession session) {
@@ -141,6 +192,27 @@ public class StudentTimeTableController {
 
         return selectionRepository.findByUser_Uid(user.getUid()).stream().map(this::toView).toList();
     }
+
+    @GetMapping("/conflicts")
+    public List<ConflictView> getConflicts(HttpSession session) {
+
+        // Retrive the logged in user 
+        User user = getLoggedInUser(session);
+
+        // Retrive all selected class sessions 
+        List<SectionSession> sessions = getStudentSessions(user);
+
+        // Detect timetable conflicts
+    return conflictService.findConflicts(sessions)
+            .stream()
+            .map(conflict -> new ConflictView(
+                toConflictSessionView(conflict.first()),
+                toConflictSessionView(conflict.second())
+            ))
+            .toList();
+}
+
+    
 
 
 @PostMapping
@@ -266,7 +338,14 @@ public void removeSection(
 
     // Delete only the student's selection
     selectionRepository.delete(selection);
+
 }
 
-    
 }
+
+
+
+
+
+
+
