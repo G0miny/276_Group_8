@@ -7,10 +7,18 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.ArrayList;
 
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+
+
 @Service 
 public class TimeTableConflictService {
-
-
+    private static final DateTimeFormatter DATE_FORMAT =
+        DateTimeFormatter.ofPattern(
+            "EEE MMM dd HH:mm:ss z uuuu",
+            Locale.ENGLISH
+        );
+    
     public boolean hasConflict(SectionSession first, SectionSession second) {
 
     // Check if the classes occur on the same day
@@ -18,7 +26,7 @@ public class TimeTableConflictService {
         return false;
     }
 
-    // Check if the date ranges overlap
+    //Check if the date ranges overlap
     if (!datesOverlap(first, second)) {
         return false;
     }
@@ -52,17 +60,19 @@ public class TimeTableConflictService {
 
     private boolean datesOverlap(SectionSession first, SectionSession second) {
 
-        LocalDate firstStart = LocalDate.parse(first.getStartDate());
-        LocalDate firstEnd = LocalDate.parse(first.getEndDate());
+    LocalDate firstStart = LocalDate.parse(first.getStartDate(), DATE_FORMAT);
 
-        LocalDate secondStart = LocalDate.parse(second.getStartDate());
-        LocalDate secondEnd = LocalDate.parse(second.getEndDate());
+    LocalDate firstEnd = LocalDate.parse(first.getEndDate(), DATE_FORMAT);
 
-        boolean firstCheck = !firstStart.isAfter(secondEnd);
-        boolean secondCheck = !secondStart.isAfter(firstEnd);
+    LocalDate secondStart = LocalDate.parse(second.getStartDate(), DATE_FORMAT);
 
-        return firstCheck && secondCheck;
-    }
+    LocalDate secondEnd = LocalDate.parse(second.getEndDate(), DATE_FORMAT);
+
+    boolean firstCheck = !firstStart.isAfter(secondEnd);
+    boolean secondCheck = !secondStart.isAfter(firstEnd);
+
+    return firstCheck && secondCheck;
+}
     public record TimeTableConflict(SectionSession first, SectionSession second) {
     }
 
