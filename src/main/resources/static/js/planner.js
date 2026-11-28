@@ -6,7 +6,7 @@ const searchStatus = document.getElementById("searchStatus");
 const savedCourses = document.getElementById("savedCourses");
 const savedStatus = document.getElementById("savedStatus");
 const weeklyTimetable = document.getElementById("weeklyTimetable");
-
+const conflictWarnings = document.getElementById("conflictWarnings");
 
 // Search for courses
 courseForm.addEventListener("submit", async function(event) {
@@ -17,7 +17,7 @@ courseForm.addEventListener("submit", async function(event) {
     const term = document.getElementById("term").value;
     const department = document.getElementById("department").value.trim();
     const course = document.getElementById("course").value.trim();
-
+    
     const params = new URLSearchParams({
         year: year,
         term: term,
@@ -178,6 +178,7 @@ courseForm.addEventListener("submit", async function(event) {
 async function loadSavedCourses() {
 
     savedCourses.replaceChildren();
+    conflictWarnings.replaceChildren();
     savedStatus.textContent = "Loading saved courses...";
 
     try {
@@ -249,9 +250,20 @@ async function loadSavedCourses() {
             card.appendChild(removeButton);
             savedCourses.appendChild(card);
         }
+        
+        // Retrive and display timetbale conflicts 
+        let conflicts = [];
 
+        try {
+            conflicts = await loadConflicts();
+            showConflictWarnings(conflicts);
+        
+        } catch (error) {
+            conflictWarnings.textContent = error.message;
+        }
+    
         // Update the weekly timetable
-        showWeeklyTimetable(selections);
+        showWeeklyTimetable(selections, conflicts);
 
     } catch (error) {
         savedStatus.textContent = error.message;
@@ -259,9 +271,59 @@ async function loadSavedCourses() {
     }
 }
 
+// Retrive timetable conflicts
+async function loadConflicts() {
 
+    const response = await fetch("/api/my-timetable/conflicts");
+
+    if (!response.ok) {
+        throw new Error("Could not load timetable conflicts");
+    }
+
+    const conflicts = await response.json();
+
+    return conflicts;
+    
+}
+
+function showConflictWarnings(conflicts) {
+
+    // Remove previud message 
+    conflictWarnings.replaceChildren();
+
+    // Display each detected conflict 
+    for (const conflict of conflicts) {
+
+        const first = conflict.first;
+        const second = conflict.second;
+
+        const warning = document.createElement("p");
+        warning.className = "conflict-warning";
+
+         warning.textContent =
+            first.department.toUpperCase() + " " +
+            first.course + " (" + first.section + ")" +
+            " conflicts with " +
+            second.department.toUpperCase() + " " +
+            second.course + " (" + second.section + ")" +
+            " on " + first.day;
+
+        conflictWarnings.appendChild(warning);
+    }
+}
+
+function isConflictingClass(meeting, conflicts) {
+
+    for (const conflict of conflicts) {
+
+        if (meeting.id === conflict.first.id || meeting.id === conflict.second.id) {
+            return true;
+        }
+    }
+    return false;
+}
 // Display classes by day
-function showWeeklyTimetable(selections) {
+function showWeeklyTimetable(selections, conflicts) {
 
     weeklyTimetable.replaceChildren();
 
@@ -290,7 +352,8 @@ function showWeeklyTimetable(selections) {
                             " " + selection.course +
                             " (" + selection.section + ")",
                         startTime: meeting.startTime,
-                        endTime: meeting.endTime
+                        endTime: meeting.endTime,
+                        conflicting: isConflictingClass(meeting, conflicts)
                     });
                 }
             }
@@ -304,6 +367,11 @@ function showWeeklyTimetable(selections) {
         for (const item of classes) {
 
             const p = document.createElement("p");
+
+            // Highlight classes involved in a conflict 
+            if (item.conflicting) {
+                p.classList.add("conflicting-class");
+            }
 
             p.textContent =
                 item.name + " " +
