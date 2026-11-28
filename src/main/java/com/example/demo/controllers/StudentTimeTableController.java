@@ -10,6 +10,8 @@ import com.example.demo.Repository.CourseSectionsRepository;
 import com.example.demo.Repository.SectionsSessionRepository;
 import com.example.demo.Repository.StudentCourseSelectionRepository;
 import com.example.demo.Repository.UserRepository;
+import com.example.demo.controllers.StudentTimeTableController.ConflictView;
+import com.example.demo.controllers.StudentTimeTableController.MeetingView;
 import com.example.demo.models.Course;
 import com.example.demo.models.CourseSections;
 import com.example.demo.models.StudentCourseSelection;
@@ -66,11 +68,11 @@ public class StudentTimeTableController {
     
     // meeting information returned 
     public record MeetingView(
+        Long id,
         String day,
         String startTime,
         String endTime,
         String campus
-    
     ) {}
 
     // Saved course information retruned 
@@ -98,6 +100,7 @@ public class StudentTimeTableController {
     ) {}
 
     public record ConflictSessionView(
+        Long id,
         String department,
         String course,
         String section,
@@ -136,6 +139,7 @@ public class StudentTimeTableController {
             .findBySection(section)
             .stream()
             .map(meeting -> new MeetingView(
+                    meeting.getId(),
                     meeting.getDay(),
                     meeting.getStartTime().toString(),
                     meeting.getEndTime().toString(),
@@ -175,6 +179,7 @@ public class StudentTimeTableController {
         Course course = section.getCourse();
 
         return new ConflictSessionView(
+        session.getId(),
         course.getDepartment(),
         course.getCourseNumber(),
         section.getSection(),
